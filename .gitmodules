@@ -1,3 +1,9 @@
 [submodule "HDL_Ciphers"]
 	path = HDL_Ciphers
 	url = https://github.com/inmcm/HDL_Ciphers
+[submodule "Trivium-Cipher"]
+	path = Trivium-Cipher
+	url = https://github.com/akshjums/Trivium-Cipher.git
+[submodule "vhdl_prng"]
+	path = vhdl_prng
+	url = https://github.com/jorisvr/vhdl_prng.git
