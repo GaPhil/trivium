@@ -1,0 +1,3 @@
+[submodule "HDL_Ciphers"]
+	path = HDL_Ciphers
+	url = https://github.com/inmcm/HDL_Ciphers
