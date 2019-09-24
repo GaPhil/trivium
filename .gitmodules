@@ -7,3 +7,6 @@
 [submodule "vhdl_prng"]
 	path = external/vhdl_prng
 	url = https://github.com/jorisvr/vhdl_prng.git
+[submodule "external/TRIVIUM"]
+	path = external/TRIVIUM
+	url = https://github.com/ixgun/TRIVIUM.git
