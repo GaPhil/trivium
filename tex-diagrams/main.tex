@@ -1,0 +1,85 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{sansmath}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{natbib}
+\usepackage{MnSymbol}
+\usepackage{graphicx}
+\bibliographystyle{unsrt}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\renewcommand\algorithmicdo{}
+\renewcommand\algorithmicthen{}
+\usepackage{url}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{standalone}
+
+
+\usepackage[british]{babel}
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+\setlength\parindent{0pt}
+\setlength\parskip{5pt}
+
+\title{Complexity theory DD2445, Homework II \\Fall 2019}
+\author{Phillip Gajland}
+\date{September 2019}
+
+\begin{document}
+
+    \maketitle
+
+    \section*{Problem 1}
+
+
+    \begin{center}
+        \begin{minipage}{.7\linewidth}
+            \begin{algorithm}[H]
+                \begin{algorithmic}[1]
+
+                    \For{$i=1$ to $N$}
+                    \State $t_1 \gets s_{66} + s_{93}$
+                    \State $t_2 \gets s_{162} + s_{177}$
+                    \State $t_3 \gets s_{243} + s_{288}$
+                    \State
+                    \State $z_i \gets t_1 + t_2 + t_3$
+                    \State
+                    \State $t_1 \gets t_1 + s_{171}$
+                    \State $t_2 \gets t_2 + s_{264}$
+                    \State $t_3 \gets t_3 + s_{69}$
+                    \State
+                    \State $(s_1,s_2,...,s_{93}) \gets (t_3,s_1,...,s_{92})$ 93 bits
+                    \State $(s_{94},s_{95},...,s_{177}) \gets (t_1,s_{94},...,s_{176})$ 83 bits
+                    \State $(s_{178},s_{179},...,s_{288}) \gets (t_2,s_{178},...,s_{287})$ 111 bits
+                    \EndFor
+                \end{algorithmic}
+            \end{algorithm}
+        \end{minipage}
+    \end{center}
+
+    \begin{figure}
+        \includestandalone[width=\textwidth]{original}
+        \caption{Original Trivium}
+        \label{fig:tikz:my}
+    \end{figure}
+
+
+    \begin{figure}
+        \includestandalone[width=\textwidth]{modified}
+        \caption{Modified Trivium}
+        \label{fig:tikz:my}
+    \end{figure}
+
+
+
+
+
+    \bibliography{bibl}
+    \nocite{*}
+
+\end{document}
