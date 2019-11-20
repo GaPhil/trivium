@@ -71,24 +71,22 @@
 
 /* ------------------------------------------------------------------------- */
 
-void ECRYPT_init(void)
-{ }
+void ECRYPT_init(void) {}
 
 /* ------------------------------------------------------------------------- */
 
 void ECRYPT_keysetup(
-  ECRYPT_ctx* ctx, 
-  const u8* key, 
-  u32 keysize,
-  u32 ivsize)
-{
-  u32 i;
+        ECRYPT_ctx *ctx,
+        const u8 *key,
+        u32 keysize,
+        u32 ivsize) {
+    u32 i;
 
-  ctx->keylen = (keysize + 7) / 8;
-  ctx->ivlen = (ivsize + 7) / 8;
+    ctx->keylen = (keysize + 7) / 8;
+    ctx->ivlen = (ivsize + 7) / 8;
 
-  for (i = 0; i < ctx->keylen; ++i)
-    ctx->key[i] = key[i];
+    for (i = 0; i < ctx->keylen; ++i)
+        ctx->key[i] = key[i];
 }
 
 /* ------------------------------------------------------------------------- */
@@ -97,94 +95,90 @@ void ECRYPT_keysetup(
 #define T(a) (t##a)
 
 void ECRYPT_ivsetup(
-  ECRYPT_ctx* ctx, 
-  const u8* iv)
-{
-  u32 i;
+        ECRYPT_ctx *ctx,
+        const u8 *iv) {
+    u32 i;
 
-  u32 s11, s12, s13;
-  u32 s21, s22, s23;
-  u32 s31, s32, s33, s34;
+    u32 s11, s12, s13;
+    u32 s21, s22, s23;
+    u32 s31, s32, s33, s34;
 
-  for (i = 0; i < ctx->keylen; ++i)
-    ctx->s[i] = ctx->key[i];
+    for (i = 0; i < ctx->keylen; ++i)
+        ctx->s[i] = ctx->key[i];
 
-  for (i = ctx->keylen; i < 12; ++i)
-    ctx->s[i] = 0;
+    for (i = ctx->keylen; i < 12; ++i)
+        ctx->s[i] = 0;
 
-  for (i = 0; i < ctx->ivlen; ++i)
-    ctx->s[i + 12] = iv[i];
+    for (i = 0; i < ctx->ivlen; ++i)
+        ctx->s[i + 12] = iv[i];
 
-  for (i = ctx->ivlen; i < 12; ++i)
-    ctx->s[i + 12] = 0;
+    for (i = ctx->ivlen; i < 12; ++i)
+        ctx->s[i + 12] = 0;
 
-  for (i = 0; i < 13; ++i)
-    ctx->s[i + 24] = 0;
+    for (i = 0; i < 13; ++i)
+        ctx->s[i + 24] = 0;
 
-  ctx->s[13 + 24] = 0x70;
+    ctx->s[13 + 24] = 0x70;
 
-  LOAD(ctx->s);
+    LOAD(ctx->s);
 
 #define Z(w)
 
-  for (i = 0; i < 4 * 9; ++i)
-    {
-      u32 t1, t2, t3;
-      
-      UPDATE();
-      ROTATE();
+    for (i = 0; i < 4 * 9; ++i) {
+        u32 t1, t2, t3;
+
+        UPDATE();
+        ROTATE();
     }
 
-  STORE(ctx->s);
+    STORE(ctx->s);
 }
 
 /* ------------------------------------------------------------------------- */
 
 void ECRYPT_process_bytes(
-  int action,
-  ECRYPT_ctx* ctx, 
-  const u8* input, 
-  u8* output, 
-  u32 msglen)
-{
-  u32 i;
+        int action,
+        ECRYPT_ctx *ctx,
+        const u8 *input,
+        u8 *output,
+        u32 msglen) {
+    u32 i;
 
-  u32 s11, s12, s13;
-  u32 s21, s22, s23;
-  u32 s31, s32, s33, s34;
+    u32 s11, s12, s13;
+    u32 s21, s22, s23;
+    u32 s31, s32, s33, s34;
 
-  u32 z;
+    u32 z;
 
-  LOAD(ctx->s);
-
-#undef Z
-#define Z(w) (U32TO8_LITTLE(output + 4 * i, U8TO32_LITTLE(input + 4 * i) ^ w))
-
-  for (i = 0; i < msglen / 4; ++i)
-    {
-      u32 t1, t2, t3;
-      
-      UPDATE();
-      ROTATE();
-    }
+    LOAD(ctx->s);
 
 #undef Z
+//#define Z(w) (U32TO8_LITTLE(output + 4 * i, U8TO32_LITTLE(input + 4 * i) ^ w))
+//
+//  for (i = 0; i < msglen / 4; ++i)
+//    {
+//      u32 t1, t2, t3;
+//
+//      UPDATE();
+//      ROTATE();
+//    }
+//
+//#undef Z
 #define Z(w) (z = w)
 
-  i *= 4;
+    i *= 4;
 
-  if (i < msglen)
-    {
-      u32 t1, t2, t3;
-      
-      UPDATE();
-      ROTATE();
+    if (i < msglen) {
+        u32 t1, t2, t3;
 
-      for ( ; i < msglen; ++i, z >>= 8)
-	output[i] = input[i] ^ U8V(z); 
+        UPDATE();
+        ROTATE();
+
+        for (; i < msglen; ++i, z >>= 8)
+            output[i] = input[i] ^ U8V(z);
     }
 
-  STORE(ctx->s);
+    STORE(ctx->s);
 }
 
 /* ------------------------------------------------------------------------- */
