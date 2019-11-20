@@ -1,12 +1,12 @@
 [submodule "HDL_Ciphers"]
-	path = external/HDL_Ciphers
+	path = external-vhdl/HDL_Ciphers
 	url = https://github.com/inmcm/HDL_Ciphers
 [submodule "Trivium-Cipher"]
-	path = external/Trivium-Cipher
+	path = external-vhdl/Trivium-Cipher
 	url = https://github.com/akshjums/Trivium-Cipher.git
 [submodule "vhdl_prng"]
-	path = external/vhdl_prng
+	path = external-vhdl/vhdl_prng
 	url = https://github.com/jorisvr/vhdl_prng.git
-[submodule "external/TRIVIUM"]
-	path = external/TRIVIUM
+[submodule "external-vhdl/TRIVIUM"]
+	path = external-vhdl/TRIVIUM
 	url = https://github.com/ixgun/TRIVIUM.git
