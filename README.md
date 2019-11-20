@@ -1,5 +1,7 @@
-# tvm
+# Breaking Trivium with a Single Fault
 
-/external/ : trivium implementations in VHDL
-
-/trivium_workspace: edited and original code from HDL_ciphers
+Directory structure:
+* `./diagrams-tex`: circuit / LFSR diagram
+* `./official-c`: official C code / modified code
+* `./report`: formal paper
+* `./external-vhdl`: external VHDL repos
