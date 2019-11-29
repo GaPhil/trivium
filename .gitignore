@@ -1,6 +1,7 @@
 *
 !/**/
 !*.*
+!/official-c/Makefile
 .idea/
 cmake-build-debug/
 *.o
