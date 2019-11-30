@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -7,12 +9,12 @@ import java.util.Map;
 class Node {
     private Node prev;
     private Node next;
-    private Map<String, int[][]> data;
+    private Map<String, Integer> data;
 
     public Node() {
     }
 
-    public Node(Node prev, Node next, Map<String, int[][]> data) {
+    public Node(Node prev, Node next, Map<String, Integer> data) {
         this.prev = prev;
         this.next = next;
         this.data = data;
@@ -34,35 +36,12 @@ class Node {
         this.next = next;
     }
 
-    public Map<String, int[][]> getData() {
+    public Map<String, Integer> getData() {
         return data;
     }
 
-    public void setData(Map<String, int[][]> data) {
+    public void setData(Map<String, Integer> data) {
         this.data = data;
-    }
-
-    @Override
-    public String toString() {
-//        String aString = "";
-        String aString = "Node{" +
-                "prev=" + prev +
-                ", next=" + next +
-                ", data=";
-        for (String key : this.data.keySet()) {
-            aString += key + ": [";
-            int[][] in = this.data.get(key);
-            for (int row = 0; row < in.length; row++) {
-                for (int col = 0; col < in[row].length; col++) {
-                    aString += in[row][col];
-                    if (col != in[row].length - 1) aString += " ";
-                }
-                if (row != in.length - 1) aString += ", ";
-            }
-            aString += "], ";
-        }
-        aString += '}';
-        return aString;
     }
 }
 
@@ -76,17 +55,32 @@ public class TVM {
 
     public static void main(String[] args) {
         System.out.println("Hello TVM");
-        Node node = new Node();
-        Map<String, int[][]> map = new HashMap<String, int[][]>();
-        map.put("tempZ", z(1));
-        map.put("tempT1", t1(1));
-        map.put("tempT2", t2(1));
-        map.put("tempT3", t3(1));
-        map.put("tempS1", s1(1));
-        map.put("tempS94", s94(1));
-        map.put("tempS178", s178(1));
-        node.setData(map);
-        System.out.println(node.toString());
+        List<Node> nodes = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; i < 2; i++) {
+                for (int k = 0; i < 2; i++) {
+                    for (int l = 0; i < 2; i++) {
+                        for (int m = 0; i < 2; i++) {
+                            for (int n = 0; i < 2; i++) {
+                                // do shit here
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        for (Node n : nodes) {
+            Map<String, Integer> map = new HashMap<String, Integer>();
+            map.put("s66", 1);
+            map.put("s93", 1);
+            map.put("s162", 1);
+            map.put("s177", 1);
+            map.put("s243", 1);
+            map.put("s288", 1);
+            n.setData(map);
+        }
+
     }
 
 
