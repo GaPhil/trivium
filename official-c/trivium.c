@@ -152,18 +152,18 @@ void ECRYPT_process_bytes(
 
     LOAD(ctx->s);
 
-#undef Z
-//#define Z(w) (U32TO8_LITTLE(output + 4 * i, U8TO32_LITTLE(input + 4 * i) ^ w))
-//
-//  for (i = 0; i < msglen / 4; ++i)
-//    {
-//      u32 t1, t2, t3;
-//
-//      UPDATE();
-//      ROTATE();
-//    }
-//
 //#undef Z
+//#define Z(w) (U32TO8_LITTLE(output + 4 * i, U8TO32_LITTLE(input + 4 * i) ^ w))
+
+  for (i = 0; i < msglen / 4; ++i)
+    {
+      u32 t1, t2, t3;
+
+      UPDATE();
+      ROTATE();
+    }
+
+#undef Z
 #define Z(w) (z = w)
 
     i *= 4;
