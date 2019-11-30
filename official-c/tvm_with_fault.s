@@ -285,7 +285,7 @@ Disassembly of section .text:
  3d4:	41 31 d0             	xor    %edx,%r8d
  3d7:	89 da                	mov    %ebx,%edx
  3d9:	44 0f a4 ea 04       	shld   $0x4,%r13d,%edx
- 3de:	21 f2                	xor    %esi,$0x00000000     // fault here
+ 3de:	21 f2                	xor    %esi,$0x00000000
  3e0:	89 4d bc             	mov    %ecx,-0x44(%rbp)
  3e3:	89 de                	mov    %ebx,%esi
  3e5:	44 0f a4 ee 03       	shld   $0x3,%r13d,%esi
@@ -299,7 +299,7 @@ Disassembly of section .text:
  3fe:	44 0f a4 fe 0e       	shld   $0xe,%r15d,%esi
  403:	44 0f a4 f8 0d       	shld   $0xd,%r15d,%eax
  408:	31 d1                	xor    %edx,%ecx
- 40a:	21 f0                	xor    %esi,$0x00000000     // fault here
+ 40a:	21 f0                	xor    %esi,$0x00000000
  40c:	44 8b 65 c8          	mov    -0x38(%rbp),%r12d
  410:	44 89 da             	mov    %r11d,%edx
  413:	44 0f a4 f2 09       	shld   $0x9,%r14d,%edx
@@ -313,7 +313,7 @@ Disassembly of section .text:
  42d:	44 0f a4 df 12       	shld   $0x12,%r11d,%edi
  432:	44 89 6d cc          	mov    %r13d,-0x34(%rbp)
  436:	44 0f a4 eb 1b       	shld   $0x1b,%r13d,%ebx
- 43b:	21 c7                	xor    %eax,$0x00000000     // fault here
+ 43b:	21 c7                	xor    %eax,$0x00000000
  43d:	44 31 d3             	xor    %r10d,%ebx
  440:	31 fb                	xor    %edi,%ebx
  442:	89 5d d0             	mov    %ebx,-0x30(%rbp)
@@ -585,14 +585,14 @@ Disassembly of section .text:
  7b4:	09 df                	or     %ebx,%edi
  7b6:	45 89 cb             	mov    %r9d,%r11d
  7b9:	45 0f a4 f3 0e       	shld   $0xe,%r14d,%r11d
- 7be:	41 21 f8             	xor    %edi,$0x00000000     // fault here
+ 7be:	41 21 f8             	xor    %edi,$0x00000000
  7c1:	45 0f a4 f1 0d       	shld   $0xd,%r14d,%r9d
- 7c6:	45 21 d9             	xor    %r11d,$0x00000000    // fault here
+ 7c6:	45 21 d9             	xor    %r11d,$0x00000000
  7c9:	44 89 ef             	mov    %r13d,%edi
  7cc:	44 0f a4 ff 13       	shld   $0x13,%r15d,%edi
  7d1:	44 89 7d cc          	mov    %r15d,-0x34(%rbp)
  7d5:	45 0f a4 fd 12       	shld   $0x12,%r15d,%r13d
- 7da:	41 21 fd             	xor    %edi,$0x00000000     // fault here
+ 7da:	41 21 fd             	xor    %edi,$0x00000000
  7dd:	44 0f a4 75 ac 12    	shld   $0x12,%r14d,-0x54(%rbp)
  7e3:	8b 7d b4             	mov    -0x4c(%rbp),%edi
  7e6:	41 31 f8             	xor    %edi,%r8d
