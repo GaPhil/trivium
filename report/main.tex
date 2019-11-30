@@ -1,5 +1,63 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
+
+
+% Phil's macros
+% Create code font alias
+\newcommand{\code}[1]{\texttt{#1}}
+
+% Code
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{customc}{
+belowcaptionskip=1\baselineskip,
+breaklines=true,
+frame=L,
+xleftmargin=\parindent,
+language=C,
+showstringspaces=false,
+basicstyle=\footnotesize\ttfamily,
+keywordstyle=\bfseries\color{green!40!black},
+commentstyle=\itshape\color{purple!40!black},
+identifierstyle=\color{blue},
+stringstyle=\color{orange},
+columns=fullflexible,
+language=c,
+frame=true,
+numbers=left
+}
+\lstdefinestyle{snippet}{
+belowcaptionskip=1\baselineskip,
+breaklines=true,
+frame=L,
+xleftmargin=\parindent,
+language=C,
+showstringspaces=false,
+basicstyle=\footnotesize\ttfamily,
+keywordstyle=\bfseries\color{green!40!black},
+commentstyle=\itshape\color{purple!40!black},
+identifierstyle=\color{blue},
+stringstyle=\color{orange},
+columns=fullflexible,
+language=c
+}
+\lstdefinestyle{bash}{
+belowcaptionskip=1\baselineskip,
+breaklines=true,
+frame=L,
+xleftmargin=\parindent,
+language=C,
+showstringspaces=false,
+basicstyle=\footnotesize\ttfamily,
+keywordstyle=\bfseries\color{green!40!black},
+commentstyle=\itshape\color{purple!40!black},
+identifierstyle=\color{blue},
+stringstyle=\color{orange},
+columns=fullflexible,
+language=bash
+}
+
+
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
@@ -77,13 +135,49 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
     IEEE, SI, MKS, CGS, ac, dc, and rms do not have to be defined. Do not use
     abbreviations in the title or heads unless they are unavoidable.
 
-    \subsection{Units}
-    \begin{itemize}
-        \item Use either SI (MKS) or CGS as primary units. (SI units are encouraged.) English units may be used as secondary units (in parentheses). An exception would be the use of English units as identifiers in trade, such as ``3.5-inch disk drive''.
-        \item Avoid combining SI and CGS units, such as current in amperes and magnetic field in oersteds. This often leads to confusion because equations do not balance dimensionally. If you must use mixed units, clearly state the units for each quantity that you use in an equation.
-        \item Do not mix complete spellings and abbreviations of units: ``Wb/m\textsuperscript{2}'' or ``webers per square meter'', not ``webers/m\textsuperscript{2}''. Spell out units when they appear in text: ``. . . a few henries'', not ``. . . a few H''.
-        \item Use a zero before decimal points: ``0.25'', not ``.25''. Use ``cm\textsuperscript{3}'', not ``cc''.)
-    \end{itemize}
+    \subsection{Code Analysis}
+    In the C code the \code{UPDATE()} macro originally does the following
+\begin{lstlisting}[style=snippet]
+#define UPDATE()
+  do { 
+    T(1) = S64(1, 66) ^ S64(1, 93);
+    T(2) = S64(2, 69) ^ S64(2, 84);
+    T(3) = S64(3, 66) ^ S96(3, 111);
+    
+    Z(T(1) ^ T(2) ^ T(3));
+    
+    T(1) ^= (S64(1, 91) & S64(1, 92)) ^ S64(2, 78); 
+    T(2) ^= (S64(2, 82) & S64(2, 83)) ^ S64(3, 87); 
+    T(3) ^= (S96(3, 109) & S96(3, 110)) ^ S64(1, 69); 
+  } while (0)
+\end{lstlisting}
+However, our fault injection is done as follows in the C code.
+\begin{lstlisting}[style=snippet]
+#define UPDATE()
+  do {
+                .       .       .
+                .       .       .
+                .       .       .
+    T(1) ^= S64(1, 91) ^ S64(2, 78); 
+    T(2) ^= S64(2, 82) ^ S64(3, 87); 
+    T(3) ^= S96(3, 109) ^ S64(1, 69); 
+  } while (0)
+\end{lstlisting}
+    
+The \code{UPDATE()} macro is used in the \code{ECRYPT_ivsetup} and \code{ECRYPT_process_bytes} functions. This means that when disassembling the \code{trivium.o} object file 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     \subsection{Equations}
     Number equations consecutively. To make your
