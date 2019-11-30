@@ -49,14 +49,14 @@
 859:	41 21 c7             	and    %eax,%r15d           // fault here 3
 
     FAULTS:
-3de:	21 f2                	xor    %esi,$0x00000000     // fault here 1
-40a:	21 f0                	xor    %esi,$0x00000000     // fault here 2
-43b:	21 c7                	xor    %eax,$0x00000000     // fault here 3
+3de:	21 f2                	xor    %esi,$0x00000000     // fault here 1 ==> 33 35 00 00 00 00
+40a:	21 f0                	xor    %esi,$0x00000000     // fault here 2 ==> 33 35 00 00 00 00
+43b:	21 c7                	xor    %eax,$0x00000000     // fault here 3 ==> 33 05 00 00 00 00
 
-70a:	21 c3                	xor    %eax,$0x00000000     // fault here 1
-746:	21 df                	xor    %ebx,$0x00000000     // fault here 2
-766:	41 21 c7             	xor    %eax,$0x00000000     // fault here 3
+70a:	21 c3                	xor    %eax,$0x00000000     // fault here 1 ==> 33 05 00 00 00 00
+746:	21 df                	xor    %ebx,$0x00000000     // fault here 2 ==> 33 1d 00 00 00 00
+766:	41 21 c7             	xor    %eax,$0x00000000     // fault here 3 ==> 33 05 00 00 00 00
 
-82e:	41 21 f9             	xor    %edi,$0x00000000     // fault here 1
-83a:	21 c8                	xor    %ecx,$0x00000000     // fault here 2
-859:	41 21 c7             	xor    %eax,$0x00000000     // fault here 3
+82e:	41 21 f9             	xor    %edi,$0x00000000     // fault here 1 ==> 33 3d 00 00 00 00
+83a:	21 c8                	xor    %ecx,$0x00000000     // fault here 2 ==> 33 0d 00 00 00 00
+859:	41 21 c7             	xor    %eax,$0x00000000     // fault here 3 ==> 33 05 00 00 00 00
