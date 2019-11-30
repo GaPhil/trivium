@@ -5,6 +5,8 @@
 .idea/
 cmake-build-debug/
 *.o
+*.class
+*.iml
 
 # Report stuff
 *.aux
