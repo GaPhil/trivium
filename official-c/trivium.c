@@ -152,6 +152,7 @@ void ECRYPT_process_bytes(
 
     LOAD(ctx->s);
 
+// for 32 bit platforms -> Mac 3.1 GHz Intel Core i7 64 bit
 //#undef Z
 //#define Z(w) (U32TO8_LITTLE(output + 4 * i, U8TO32_LITTLE(input + 4 * i) ^ w))
 
