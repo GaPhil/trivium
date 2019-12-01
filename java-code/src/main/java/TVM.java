@@ -52,35 +52,27 @@ public class TVM {
 //          for node in new_nodes:
 //              check_legality(node)
 
-
     public static void main(String[] args) {
         System.out.println("Hello TVM");
         List<Node> nodes = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; i < 2; i++) {
-                for (int k = 0; i < 2; i++) {
-                    for (int l = 0; i < 2; i++) {
-                        for (int m = 0; i < 2; i++) {
-                            for (int n = 0; i < 2; i++) {
-                                // do shit here
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-        for (Node n : nodes) {
-            Map<String, Integer> map = new HashMap<String, Integer>();
-            map.put("s66", 1);
-            map.put("s93", 1);
-            map.put("s162", 1);
-            map.put("s177", 1);
-            map.put("s243", 1);
-            map.put("s288", 1);
+        for (int k = 0; k < 64; k++)
+            nodes.add(new Node()); // create first level of nodes
+        int i = 0;
+        for (Node n : nodes) {       // 64 iterations
+            Map<String, Integer> map = new HashMap<>();
+            // alternate 2, 4, 8, 16, 32
+            map.put("s66", i % 2);
+            map.put("s93", (i >> 1) % 2);
+            map.put("s162", (i >> 2) % 2);
+            map.put("s177", (i >> 3) % 2);
+            map.put("s243", (i >> 4) % 2);
+            map.put("s288", (i >> 5) % 2);
             n.setData(map);
+            i++;
         }
-
+        for (int j = 0; j < 64; j++) {
+            System.out.println("Node: " + j + " " + nodes.get(j).getData());
+        }
     }
 
 
