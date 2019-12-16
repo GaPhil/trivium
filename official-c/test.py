@@ -28,14 +28,6 @@ class Trivium:
         for i in range(4*288):
             self._gen_keystream()
 
-    def encrypt(self, message):
-        """To be implemented"""
-        pass
-
-    def decrypt(self, cipher):
-        """To be implemented"""
-        pass
-
     def keystream(self):
         """output keystream
         only use this when you know what you are doing!!"""
@@ -55,15 +47,20 @@ class Trivium:
     def _gen_keystream(self):
         """this method generates triviums keystream"""
 
-        a_1 = self.state[90] & self.state[91]
-        a_2 = self.state[181] & self.state[182]
-        a_3 = self.state[292] & self.state[293]
+        # a_1 = self.state[90] & self.state[91]
+        # a_2 = self.state[181] & self.state[182]
+        # a_3 = self.state[292] & self.state[293]
+        a_1 = 0
+        a_2 = 0
+        a_3 = 0
+
 
         t_1 = self.state[65] ^ self.state[92]
         t_2 = self.state[168] ^ self.state[183]
         t_3 = self.state[249] ^ self.state[294]
 
-        out = t_1 ^ t_2 ^ t_3
+        # out = t_1 ^ t_2 ^ t_3
+        out = t_1 ^ t_1 ^ t_1
 
         s_1 = a_1 ^ self.state[177] ^ t_1
         s_2 = a_2 ^ self.state[270] ^ t_2
@@ -76,7 +73,6 @@ class Trivium:
         self.state[184] = s_2
 
         return out
-import sys
 
 k1="0F62B5085BAE0154A7FA"
 i1="288FF65DC42B92F960C7"
@@ -99,7 +95,7 @@ def main():
 
     for i in range(1):
         keystream = []
-        for j in range(128):
+        for j in range(1024):
             keystream.append(next_key_bit())
         print "Stream: "+bits_to_hex(keystream)
 
