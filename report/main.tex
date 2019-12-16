@@ -4,11 +4,14 @@
 
 % Phil's macros
 % Create code font alias
-\newcommand{\code}[1]{\texttt{#1}}
-
+\usepackage{tikz}
 % Code
 \usepackage{listings}
 \usepackage{xcolor}
+\newcommand{\code}[1]{\texttt{#1}}
+\usepackage{minted}
+
+
 \lstdefinestyle{customc}{
 belowcaptionskip=1\baselineskip,
 breaklines=true,
@@ -41,12 +44,32 @@ stringstyle=\color{orange},
 columns=fullflexible,
 language=c
 }
-\lstdefinestyle{bash}{
+\lstdefinestyle{hex}{
+belowcaptionskip=1\baselineskip,
+breaklines=true,
+frame=LR,
+% xleftmargin=\parindent,
+language=C,
+showstringspaces=false,
+basicstyle=\footnotesize\ttfamily,
+keywordstyle=\bfseries\color{green!40!black},
+commentstyle=\itshape\color{purple!40!black},
+% identifierstyle=\color{blue},
+stringstyle=\color{orange},
+columns=fullflexible,
+keywords=[2]{fail},
+keywords=[3]{pass},
+keywordstyle={\color{blue!80!black}},
+keywordstyle=[2]{\color{red!80!black}},
+keywordstyle=[3]{\color{green!50!black}},
+}
+
+\lstdefinestyle{asm}{
 belowcaptionskip=1\baselineskip,
 breaklines=true,
 frame=L,
 xleftmargin=\parindent,
-language=C,
+language=[x86masm]Assembler,
 showstringspaces=false,
 basicstyle=\footnotesize\ttfamily,
 keywordstyle=\bfseries\color{green!40!black},
@@ -54,7 +77,6 @@ commentstyle=\itshape\color{purple!40!black},
 identifierstyle=\color{blue},
 stringstyle=\color{orange},
 columns=fullflexible,
-language=bash
 }
 
 
@@ -64,298 +86,349 @@ language=bash
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
-\usepackage{xcolor}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
 T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-    \title{Breaking Trivium with a Single Fault \\
-    }
+\title{Breaking Trivium with Stuck-at-0 Faults}
 
-    \author{\IEEEauthorblockN{Phillip Gajland}
-    \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-    \textit{Theoretical Computer Science} \\
-    Stockholm, Sweden \\
-    gajland@kth.se}
-    \and
-    \IEEEauthorblockN{Daniel Skantz}
-    \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-    \textit{Theoretical Computer Science} \\
-    Stockholm, Sweden \\
-    danska@kth.se}
-    \and
-    \IEEEauthorblockN{Elena Dubrova}
-    \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-    \textit{Electronic Systems Design} \\
-    Stockholm, Sweden \\
-    dubrova@kth.se}
-    }
+\author{\IEEEauthorblockN{Phillip Gajland}
+\IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
+\textit{Theoretical Computer Science} \\
+Stockholm, Sweden \\
+gajland@kth.se}
+\and
+\IEEEauthorblockN{Daniel Skantz}
+\IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
+\textit{Theoretical Computer Science} \\
+Stockholm, Sweden \\
+danska@kth.se}
+\and
+\IEEEauthorblockN{Elena Dubrova}
+\IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
+\textit{Electronic Systems Design} \\
+Stockholm, Sweden \\
+dubrova@kth.se}
+}
 
-    \maketitle
+\maketitle
 
-    \begin{abstract}
-        This document is a model and instructions for \LaTeX.
-        This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes,
-        or Math in Paper Title or Abstract.
-    \end{abstract}
+\begin{abstract}
+As the Internet of Things (IoT) continues to gain traction, so does the need for secure IoT devices. Although 23.3 billion IoT devices are estimated to be connected by 2023 \cite{iot}, vendors often neglect the security of such devices. Stream ciphers can offer an attractive solution for secure communications, when low power consumption is essential. 
 
-    \begin{IEEEkeywords}
-        component, formatting, style, styling, insert
-    \end{IEEEkeywords}
+The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. 
 
-    \section{Introduction}
-    This document is a model and instructions for \LaTeX.
-    Please observe the conference page limits.
+In this paper we study the design choices made by the authors of Trivium in order to demonstrate a fault attack on the software implementation of the cipher. Whilst Trivium maintains most desirable cryptographic properties, a simple design was chosen by the authors to provide flexibility. Our attack works by modifying the compiled binary at targeted positions to introduce stuck at 0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher. In turn extraction of the 80-bit key becomes tractable.
+\end{abstract}
 
-    \section{Ease of Use}
+\begin{IEEEkeywords}
+trivium, stream cipher, fault attack
+\end{IEEEkeywords}
 
-    \subsection{Maintaining the Integrity of the Specifications}
+\section{Introduction}
 
-    The IEEEtran class file is used to format your paper and style the text. All margins,
-    column widths, line spaces, and text fonts are prescribed; please do not
-    alter them. You may note peculiarities. For example, the head margin
-    measures proportionately more than is customary. This measurement
-    and others are deliberate, using specifications that anticipate your paper
-    as one part of the entire proceedings, and not as an independent document.
-    Please do not revise any of the current designations.
 
-    \section{Prepare Your Paper Before Styling}
-    Before you begin to format your paper, first write and save the content as a
-    separate text file. Complete all content and organizational editing before
-    formatting. Please note sections \ref{AA}--\ref{SCM} below for more information on
-    proofreading, spelling and grammar.
 
-    Keep your text and graphic files separate until after the text has been
-    formatted and styled. Do not number text heads---{\LaTeX} will do that
-    for you.
 
-    \subsection{Abbreviations and Acronyms}\label{AA}
-    Define abbreviations and acronyms the first time they are used in the text,
-    even after they have been defined in the abstract. Abbreviations such as
-    IEEE, SI, MKS, CGS, ac, dc, and rms do not have to be defined. Do not use
-    abbreviations in the title or heads unless they are unavoidable.
+In this paper we analyse the design choices made by the authors of Trivium, in order to discover a new class of vulnerabilities. 
 
-    \subsection{Code Analysis}
-    In the C code the \code{UPDATE()} macro originally does the following
+
+We go on to demonstrate a fault attack on the software implementation of Trivium.
+
+As the Internet of Things (IoT) continues to gain traction, so does the need for secure IoT devices. Although 23.3 billion IoT devices are estimated to be connected by 2023 \cite{iot}, vendors often neglect the security of such devices. Stream ciphers can offer an attractive solution for secure communications, when low power consumption is essential. 
+
+The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. In this paper we analyse the design choices made by the authors of Trivium. We go on to demonstrate a fault attack on the software implementation of Trivium. 
+
+The attack works by modifying compiled binaries at targeted positions to introduce stuck at 0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher and in turn extraction of the 80-bit key becomes tractable.
+
+
+trade off between performance and security, when low power consumption is of high significance. 
+
+
+Stream ciphers can offer an attractive trade off between security and per in situations where power consutmption 
+, due to their low
+
+
+When performance 
+
+A primary concern is securing systems 
+
+an attractive solution when low powerconsumption is vital 
+Thus, significantly increasing the attack surface for adversaries to mount attacks on larger systems, as was demonstrated in the 2016 Dyn cyberattack.
+
+
+Stream Ciphers offer an attractive trade-off between lightweight crypto primitives and security in 
+
+\section{Background}
+
+As a result of the failures of all six stream ciphers submitted to the NESSIE (New European Schemes for Signatures, Integrity and Encryption) project, in 2004 the eSTREAM project was launched in order to \textit{"identify new stream ciphers suitable for widespread adoption"}\cite{call}.
+
+
+
+\section{Ease of Use}
+
+\subsection{Code Analysis}
+The official C code authored by Christophe De Canni\`ere can be found on  
+
+In the C code the \code{UPDATE()} macro originally does the following
 \begin{lstlisting}[style=snippet]
 #define UPDATE()
-  do { 
-    T(1) = S64(1, 66) ^ S64(1, 93);
-    T(2) = S64(2, 69) ^ S64(2, 84);
-    T(3) = S64(3, 66) ^ S96(3, 111);
-    
-    Z(T(1) ^ T(2) ^ T(3));
-    
-    T(1) ^= (S64(1, 91) & S64(1, 92)) ^ S64(2, 78); 
-    T(2) ^= (S64(2, 82) & S64(2, 83)) ^ S64(3, 87); 
-    T(3) ^= (S96(3, 109) & S96(3, 110)) ^ S64(1, 69); 
-  } while (0)
+do { 
+T(1) = S64(1, 66) ^ S64(1, 93);
+T(2) = S64(2, 69) ^ S64(2, 84);
+T(3) = S64(3, 66) ^ S96(3, 111);
+
+Z(T(1) ^ T(2) ^ T(3));
+
+T(1) ^= (S64(1, 91) & S64(1, 92)) ^ S64(2, 78); 
+T(2) ^= (S64(2, 82) & S64(2, 83)) ^ S64(3, 87); 
+T(3) ^= (S96(3, 109) & S96(3, 110)) ^ S64(1, 69); 
+} while (0)
 \end{lstlisting}
 However, our fault injection is done as follows in the C code.
 \begin{lstlisting}[style=snippet]
 #define UPDATE()
-  do {
-                .       .       .
-                .       .       .
-                .       .       .
-    T(1) ^= S64(1, 91) ^ S64(2, 78); 
-    T(2) ^= S64(2, 82) ^ S64(3, 87); 
-    T(3) ^= S96(3, 109) ^ S64(1, 69); 
-  } while (0)
+do {
+.       .       .
+.       .       .
+.       .       .
+T(1) ^= S64(1, 91) ^ S64(2, 78); 
+T(2) ^= S64(2, 82) ^ S64(3, 87); 
+T(3) ^= S96(3, 109) ^ S64(1, 69); 
+} while (0)
 \end{lstlisting}
-    
-The \code{UPDATE()} macro is used in the \code{ECRYPT_ivsetup} and \code{ECRYPT_process_bytes} functions. This means that when disassembling the \code{trivium.o} object file 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
-    \subsection{Equations}
-    Number equations consecutively. To make your
-    equations more compact, you may use the solidus (~/~), the exp function, or
-    appropriate exponents. Italicize Roman symbols for quantities and variables,
-    but not Greek symbols. Use a long dash rather than a hyphen for a minus
-    sign. Punctuate equations with commas or periods when they are part of a
-    sentence, as in:
-    \begin{equation}
-        a+b=\gamma\label{eq}
-    \end{equation}
+The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. This means that when disassembling the \code{trivium.o} object file 
 
-    Be sure that the
-    symbols in your equation have been defined before or immediately following
-    the equation. Use ``\eqref{eq}'', not ``Eq.~\eqref{eq}'' or ``equation \eqref{eq}'', except at
-    the beginning of a sentence: ``Equation \eqref{eq} is . . .''
+We run the fault injected code using the following key \code{0x0F62B5085BAE0154A7FA} and IV \code{0x288FF65DC42B92F960C7}. Using the Berlekamp–Massey algorithm \cite{massey} we find the shortest linear feedback register (LFSR) for the given bitstream. The polynomial is
+$x^{61} + x^{60} + x^{55} + x^{54} + x^{52} + x^{51} + x^{46} + x^{45} + x^{43} + x^{42} + x^{41} + x^{40} + x^{39} + x^{38} + x^{37} + x^{36} + x^{35} + x^{31} + x^{28} + x^{25} + x^{24} + x^{23} + x^{20} + x^{19} + x^{18} + x^{11} + x^8 + x^7 + 1$.
 
-    \subsection{\LaTeX-Specific Advice}
+original
+\begin{lstlisting}[style=hex]
+........ EA0421F2 894DBC89 ........ 0FA4F80D
+31D121F0 448B65C8 ........ 6DCC440F A4EB1B21
+C74431D3 31FB895D ........ 89D30FA4 F30421C3
+448B5DC8 ........ E0440FA4 F00921DF 89C34431
+........ 13450FA4 E7124121 C74489C0 4131CF45
+........ F24589E7  F10E4121 F9448975 C8440FA4
+........ 410FA4D7 124121C7 ........  ........
+\end{lstlisting}
 
-    Please use ``soft'' (e.g., \verb|\eqref{Eq}|) cross references instead
-    of ``hard'' references (e.g., \verb|(1)|). That will make it possible
-    to combine sections, add equations, or change the order of figures or
-    citations without having to go through the file line by line.
+modified
+\begin{lstlisting}[style=hex]
+........ EA0433F6 894DBC89 ........ 0FA4F80D 
+31D133F6 448B65C8 ........ 6DCC440F A4EB1B33
+C04431D3 31FB895D ........ 89D30FA4 F30433C0 
+448B5DC8 ........ E0440FA4 F00933C9 89C34431
+........ 13450FA4 E71233C0 904489C0 4131CF45
+........ F24589E7 F10E33FF 90448975 C8440FA4 
+........ 410FA4D7 1233C090 ........  ........
+\end{lstlisting}
 
-    Please don't use the \verb|{eqnarray}| equation environment. Use
-    \verb|{align}| or \verb|{IEEEeqnarray}| instead. The \verb|{eqnarray}|
-    environment leaves unsightly spaces around relation symbols.
 
-    Please note that the \verb|{subequations}| environment in {\LaTeX}
-    will increment the main equation counter even when there are no
-    equation numbers displayed. If you forget that, you might write an
-    article in which the equation numbers skip from (17) to (20), causing
-    the copy editors to wonder if you've discovered a new method of
-    counting.
 
-    {\BibTeX} does not work by magic. It doesn't get the bibliographic
-    data from thin air but from .bib files. If you use {\BibTeX} to produce a
-    bibliography you must send the .bib files.
+original
+modified
+\newcommand{\hf}{\makebox[0pt][l]{\color{green}\rule[-3pt]{0.08\linewidth}{11pt}}}
+\newcommand{\ha}{\makebox[0pt][l]{\color{green}\rule[-3pt]{0.04\linewidth}{11pt}}}
 
-    {\LaTeX} can't read your mind. If you assign the same label to a
-    subsubsection and a table, you might find that Table I has been cross
-    referenced as Table IV-B3.
+\begin{lstlisting}[style=hex,escapechar=\%]
+1a) ORIG:...    EA0421F2 ........ 31D121F0 ........
+1b) MOD:....     EA04%\hf%33F6 ........ 31D1%\hf%33F6  ........
 
-    {\LaTeX} does not have precognitive abilities. If you put a
-    \verb|\label| command before the command that updates the counter it's
-    supposed to be using, the label will pick up the last counter to be
-    cross referenced instead. In particular, a \verb|\label| command
-    should not go before the caption of a figure or a table.
+2a)  A4EB1B21 C74431D3 ........ F30421C3
+2b)  A4EB1B%\ha%33 %\ha%C04431D3 ........ F304%\hf%33C0
 
-    Do not use \verb|\nonumber| inside the \verb|{array}| environment. It
-    will not stop equation numbers inside \verb|{array}| (there won't be
-    any anyway) and it might stop a wanted equation number in the
-    surrounding equation.
+3a) ........ F00921DF ........ E7124121 C74489C0
+3b) ........ F009%\hf%33C9 ........ E712%\hf%33C0 %\ha%904489C0 
 
-    \subsection{Some Common Mistakes}\label{SCM}
-    \begin{itemize}
-        \item The word ``data'' is plural, not singular.
-        \item The subscript for the permeability of vacuum $\mu_{0}$, and other common scientific constants, is zero with subscript formatting, not a lowercase letter ``o''.
-        \item In American English, commas, semicolons, periods, question and exclamation marks are located within quotation marks only when a complete thought or name is cited, such as a title or full quotation. When quotation marks are used, instead of a bold or italic typeface, to highlight a word or phrase, punctuation should appear outside of the quotation marks. A parenthetical phrase or statement at the end of a sentence is punctuated outside of the closing parenthesis (like this). (A parenthetical sentence is punctuated within the parentheses.)
-        \item A graph within a graph is an ``inset'', not an ``insert''. The word alternatively is preferred to the word ``alternately'' (unless you really mean something that alternates).
-        \item Do not use the word ``essentially'' to mean ``approximately'' or ``effectively''.
-        \item In your paper title, if the words ``that uses'' can accurately replace the word ``using'', capitalize the ``u''; if not, keep using lower-cased.
-        \item Be aware of the different meanings of the homophones ``affect'' and ``effect'', ``complement'' and ``compliment'', ``discreet'' and ``discrete'', ``principal'' and ``principle''.
-        \item Do not confuse ``imply'' and ``infer''.
-        \item The prefix ``non'' is not a word; it should be joined to the word it modifies, usually without a hyphen.
-        \item There is no period after the ``et'' in the Latin abbreviation ``et al.''.
-        \item The abbreviation ``i.e.'' means ``that is'', and the abbreviation ``e.g.'' means ``for example''.
-    \end{itemize}
-    An excellent style manual for science writers is \cite{b7}.
+4a) ........ F10E4121 F9448975 ........ F00D21C8
 
-    \subsection{Authors and Affiliations}
-    \textbf{The class file is designed for, but not limited to, six authors.} A
-    minimum of one author is required for all conference articles. Author names
-    should be listed starting from left to right and then moving down to the
-    next line. This is the author sequence that will be used in future citations
-    and by indexing services. Names should not be listed in columns nor group by
-    affiliation. Please keep your affiliations as succinct as possible (for
-    example, do not differentiate among departments of the same organization).
+124121C7
+4b) ........ F10E%\hf%33FF %\ha%90448975 ........ F00D33C9
 
-    \subsection{Identify the Headings}
-    Headings, or heads, are organizational devices that guide the reader through
-    your paper. There are two types: component heads and text heads.
+12%\hf%33C0%\ha%90
+\end{lstlisting}
 
-    Component heads identify the different components of your paper and are not
-    topically subordinate to each other. Examples include Acknowledgments and
-    References and, for these, the correct style to use is ``Heading 5''. Use
-    ``figure caption'' for your Figure captions, and ``table head'' for your
-    table title. Run-in heads, such as ``Abstract'', will require you to apply a
-    style (in this case, italic) in addition to the style provided by the drop
-    down menu to differentiate the head from the text.
+\clearpage
 
-    Text heads organize the topics on a relational, hierarchical basis. For
-    example, the paper title is the primary text head because all subsequent
-    material relates and elaborates on this one topic. If there are two or more
-    sub-topics, the next level head (uppercase Roman numerals) should be used
-    and, conversely, if there are not at least two sub-topics, then no subheads
-    should be introduced.
+\begin{lstlisting}[style=asm]
+and    %esi,%edx    ---> 21 f2 
+and    %esi,%eax    ---> 21 f0
+and    %eax,%edi    ---> 21 c7 
 
-    \subsection{Figures and Tables}
-    \paragraph{Positioning Figures and Tables} Place figures and tables at the top and
-    bottom of columns. Avoid placing them in the middle of columns. Large
-    figures and tables may span across both columns. Figure captions should be
-    below the figures; table heads should appear above the tables. Insert
-    figures and tables after they are cited in the text. Use the abbreviation
-    ``Fig.~\ref{fig}'', even at the beginning of a sentence.
+and    %eax,%ebx    ---> 21 c3
+and    %ebx,%edi    ---> 21 df 
+and    %eax,%r15d   --> 41 21 c7
 
-    \begin{table}[htbp]
-        \caption{Table Type Styles}
-        \begin{center}
-            \begin{tabular}{|c|c|c|c|}
-                \hline
-                \textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
-                \cline{2-4}
-                \textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
-                \hline
-                copy& More table copy$^{\mathrm{a}}$& &  \\
-                \hline
-                \multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
-            \end{tabular}
-            \label{tab1}
-        \end{center}
-    \end{table}
+and    %edi,%r9d    ---> 41 21 f9
+and    %ecx,%eax    ---> 21 c8
+and    %eax,%r15d   --> 41 21 c7
+\end{lstlisting}
 
-    \begin{figure}[htbp]
-        \centerline{\includegraphics{fig1.png}}
-        \caption{Example of a figure caption.}
-        \label{fig}
-    \end{figure}
+\begin{lstlisting}[style=asm]
+xor    %esi,%esi    ---> 33 f6
+xor    %esi,%esi    ---> 33 f6
+xor    %eax,%eax    ---> 33 c0
 
-    Figure Labels: Use 8 point Times New Roman for Figure labels. Use words
-    rather than symbols or abbreviations when writing Figure axis labels to
-    avoid confusing the reader. As an example, write the quantity
-    ``Magnetization'', or ``Magnetization, M'', not just ``M''. If including
-    units in the label, present them within parentheses. Do not label axes only
-    with units. In the example, write ``Magnetization (A/m)'' or ``Magnetization
-    \{A[m(1)]\}'', not just ``A/m''. Do not label axes with a ratio of
-    quantities and units. For example, write ``Temperature (K)'', not
-    ``Temperature/K''.
+xor    %eax,%eax    ---> 33 c0
+xor    %ebx,%ebx    ---> 33 db 
+xor    %eax,%eax    ---> 33 c0
+nop     ------------->  90
 
-    \section*{Acknowledgment}
+xor    %edi,%edi    ---> 33 ff
+nop     -------------> 90
+xor    %ecx,%ecx    ---> 33 c9
+xor    %eax,%eax    ---> 33 c0
+nop     -------------> 90
+\end{lstlisting}
 
-    The preferred spelling of the word ``acknowledgment'' in America is without
-    an ``e'' after the ``g''. Avoid the stilted expression ``one of us (R. B.
-    G.) thanks $\ldots$''. Instead, try ``R. B. G. thanks$\ldots$''. Put sponsor
-    acknowledgments in the unnumbered footnote on the first page.
 
-    \section*{References}
 
-    Please number citations consecutively within brackets \cite{b1}. The
-    sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference
-    number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at
-    the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
 
-    Number footnotes separately in superscripts. Place the actual footnote at
-    the bottom of the column in which it was cited. Do not put footnotes in the
-    abstract or reference list. Use letters for table footnotes.
 
-    Unless there are six authors or more give all authors' names; do not use
-    ``et al.''. Papers that have not been published, even if they have been
-    submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers
-    that have been accepted for publication should be cited as ``in press'' \cite{b5}.
-    Capitalize only the first word in a paper title, except for proper nouns and
-    element symbols.
+\subsection{Unwinding the bitstream}
 
-    For papers published in translation journals, please give the English
-    citation first, followed by the original foreign-language citation \cite{b6}.
 
-    \begin{thebibliography}{00}
-        \bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-        \bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-        \bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-        \bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-        \bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-        \bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-        \bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
-    \end{thebibliography}
-    \vspace{12pt}
-    \color{red}
-    IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
+
+Number equations consecutively. To make your
+equations more compact, you may use the solidus (~/~), the exp function, or
+appropriate exponents. Italicize Roman symbols for quantities and variables,
+but not Greek symbols. Use a long dash rather than a hyphen for a minus
+sign. Punctuate equations with commas or periods when they are part of a
+sentence, as in:
+\begin{equation}
+a+b=\gamma\label{eq}
+\end{equation}
+
+Be sure that the
+symbols in your equation have been defined before or immediately following
+the equation. Use ``\eqref{eq}'', not ``Eq.~\eqref{eq}'' or ``equation \eqref{eq}'', except at
+the beginning of a sentence: ``Equation \eqref{eq} is . . .''
+
+\subsection{\LaTeX-Specific Advice}
+
+Please use ``soft'' (e.g., \verb|\eqref{Eq}|) cross references instead
+of ``hard'' references (e.g., \verb|(1)|). That will make it possible
+to combine sections, add equations, or change the order of figures or
+citations without having to go through the file line by line.
+
+Please don't use the \verb|{eqnarray}| equation environment. Use
+\verb|{align}| or \verb|{IEEEeqnarray}| instead. The \verb|{eqnarray}|
+environment leaves unsightly spaces around relation symbols.
+
+Please note that the \verb|{subequations}| environment in {\LaTeX}
+will increment the main equation counter even when there are no
+equation numbers displayed. If you forget that, you might write an
+article in which the equation numbers skip from (17) to (20), causing
+the copy editors to wonder if you've discovered a new method of
+counting.
+
+{\BibTeX} does not work by magic. It doesn't get the bibliographic
+data from thin air but from .bib files. If you use {\BibTeX} to produce a
+bibliography you must send the .bib files.
+
+{\LaTeX} can't read your mind. If you assign the same label to a
+subsubsection and a table, you might find that Table I has been cross
+referenced as Table IV-B3.
+
+{\LaTeX} does not have precognitive abilities. If you put a
+\verb|\label| command before the command that updates the counter it's
+supposed to be using, the label will pick up the last counter to be
+cross referenced instead. In particular, a \verb|\label| command
+should not go before the caption of a figure or a table.
+
+Do not use \verb|\nonumber| inside the \verb|{array}| environment. It
+will not stop equation numbers inside \verb|{array}| (there won't be
+any anyway) and it might stop a wanted equation number in the
+surrounding equation.
+
+\subsection{Some Common Mistakes}\label{SCM}
+\begin{itemize}
+\item The word ``data'' is plural, not singular.
+\item The subscript for the permeability of vacuum $\mu_{0}$, and other common scientific constants, is zero with subscript formatting, not a lowercase letter ``o''.
+\item In American English, commas, semicolons, periods, question and exclamation marks are located within quotation marks only when a complete thought or name is cited, such as a title or full quotation. When quotation marks are used, instead of a bold or italic typeface, to highlight a word or phrase, punctuation should appear outside of the quotation marks. A parenthetical phrase or statement at the end of a sentence is punctuated outside of the closing parenthesis (like this). (A parenthetical sentence is punctuated within the parentheses.)
+\item A graph within a graph is an ``inset'', not an ``insert''. The word alternatively is preferred to the word ``alternately'' (unless you really mean something that alternates).
+\item Do not use the word ``essentially'' to mean ``approximately'' or ``effectively''.
+\item In your paper title, if the words ``that uses'' can accurately replace the word ``using'', capitalize the ``u''; if not, keep using lower-cased.
+\item Be aware of the different meanings of the homophones ``affect'' and ``effect'', ``complement'' and ``compliment'', ``discreet'' and ``discrete'', ``principal'' and ``principle''.
+\item Do not confuse ``imply'' and ``infer''.
+\item The prefix ``non'' is not a word; it should be joined to the word it modifies, usually without a hyphen.
+\item There is no period after the ``et'' in the Latin abbreviation ``et al.''.
+\item The abbreviation ``i.e.'' means ``that is'', and the abbreviation ``e.g.'' means ``for example''.
+\end{itemize}
+An excellent style manual for science writers is \cite{b7}.
+
+\subsection{Authors and Affiliations}
+\textbf{The class file is designed for, but not limited to, six authors.} A
+minimum of one author is required for all conference articles. Author names
+should be listed starting from left to right and then moving down to the
+next line. This is the author sequence that will be used in future citations
+and by indexing services. Names should not be listed in columns nor group by
+affiliation. Please keep your affiliations as succinct as possible (for
+example, do not differentiate among departments of the same organization).
+
+\subsection{Related Works}
+Dubrova performed some ground breaking work by demonstrating a single fault attack on ACORN.
+
+
+
+\subsection{Figures and Tables}
+\paragraph{Positioning Figures and Tables} Place figures and tables at the top and
+bottom of columns. Avoid placing them in the middle of columns. Large
+figures and tables may span across both columns. Figure captions should be
+below the figures; table heads should appear above the tables. Insert
+figures and tables after they are cited in the text. Use the abbreviation
+``Fig.~\ref{fig}'', even at the beginning of a sentence.
+
+\begin{table}[htbp]
+\caption{Table Type Styles}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
+\cline{2-4}
+\textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
+\hline
+copy& More table copy$^{\mathrm{a}}$& &  \\
+\hline
+\multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
+\end{tabular}
+\label{tab1}
+\end{center}
+\end{table}
+
+
+
+\begin{figure}[htb]
+\centering
+\resizebox{0.5\textwidth}{!}{\input{diagrams-tex/modified.tex}}
+\caption{Modified Trivium Circuit}\label{fig:myfigure}
+\end{figure}
+
+Figure Labels: Use 8 point Times New Roman for Figure labels. Use words
+rather than symbols or abbreviations when writing Figure axis labels to
+avoid confusing the reader. As an example, write the quantity
+``Magnetization'', or ``Magnetization, M'', not just ``M''. If including
+units in the label, present them within parentheses. Do not label axes only
+with units. In the example, write ``Magnetization (A/m)'' or ``Magnetization
+\{A[m(1)]\}'', not just ``A/m''. Do not label axes with a ratio of
+quantities and units. For example, write ``Temperature (K)'', not
+``Temperature/K''.
+
+\section*{Acknowledgment}
+
+The preferred spelling of the word ``acknowledgment'' in America is without
+an ``e'' after the ``g''. Avoid the stilted expression ``one of us (R. B.
+G.) thanks $\ldots$''. Instead, try ``R. B. G. thanks$\ldots$''. Put sponsor
+acknowledgments in the unnumbered footnote on the first page.
+
+\begin{thebibliography}{00}
+\bibitem{massey} Massey, J. L. (1969). Shift-Register Synthesis and BCH Decoding. IEEE Transactions on Information Theory, 15(1), 122–127. https://doi.org/10.1109/TIT.1969.1054260
+\bibitem{call} "ECRYPT Call for Stream Cipher Primitives" (version 1.3 ed.). 12 April 2005. Retrieved 2 April 2014. http://www.ecrypt.eu.org/stream/call/
+\bibitem{block-insp} Christophe De Cannière, Bart Preneel (2006-01-02). "Trivium - A Stream Cipher Construction Inspired by Block Cipher Design Principles"
+\bibitem{iot} Ericsson, “Ericsson
+Mobility Report” 2018. https://www.ericsson.com/49d1d9/assets/local/mobility-report/documents/2018/ericsson-mobility-report-june-2018.pdf
+\end{thebibliography}
 
 \end{document}
