@@ -12,3 +12,6 @@ cmake-build-debug/
 *.aux
 *.log
 *.pdf
+*.nav
+*.snm
+*.toc
