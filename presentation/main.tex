@@ -78,8 +78,8 @@ columns=fullflexible,
 \textbf{Trivium} &-& What is it?\\
 \textbf{Attack Scenario} &-& How can it be done?\\
 \textbf{Fault Injection} &-& How does it work?\\
-\textbf{Summary} &-& In short?\\
-\textbf{Conclusion} &-& And what?
+\textbf{Cryptanalysis} &-& How to retrieve the key?\\
+\textbf{Summary} &-& In short?
 \end{tabular}
 \end{table}
 \end{frame}
@@ -96,10 +96,13 @@ columns=fullflexible,
 
 \begin{frame}{Motivation}
 \begin{itemize}[itemsep=0.5cm]
-\item \textbf{23.3 billion IoT devices by 2023:}
-\begin{itemize}
-\item DDoS attacks e.g. Dyn cyberattack 2016
+\item[$\blacktriangleright$] A network is only as secure as its weakest link.
+\item[$\blacktriangleright$] 23.3 billion IoT devices by 2023.
+\item[$\blacktriangleright$] Need for securing IoT devices.
+\begin{itemize}[itemsep=0.25cm]
+\item[$\triangleright$] DDoS attacks e.g. Dyn cyberattack 2016.
 \end{itemize}
+\item[$\blacktriangleright$] Require energy efficient ciphers.
 \end{itemize}
 \end{frame}
 
@@ -125,6 +128,8 @@ SOSEMANUK &
 \end{itemize}
 \end{frame}
 
+\section{Trivium}
+
 \begin{frame}{Trivium}
 \begin{columns}
 \column{0.5\textwidth}
@@ -136,7 +141,7 @@ SOSEMANUK &
 \item[$\blacktriangleright$] 3 shift registers:
 \begin{itemize}
 \item a) 93-bit
-\item b) 83-bit
+\item b) 84-bit
 \item c) 111-bit
 \end{itemize}
 \end{itemize}
@@ -168,7 +173,7 @@ SOSEMANUK &
 \State $t_3 \gets t_3 + s_{286} \cdot s_{287} + s_{69}$
 \State
 \State $(s_1,s_2,\dots,s_{93}) \gets (t_3,s_1,\dots,s_{92})$ \Comment{93 bits}
-\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{83 bits}
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{84 bits}
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$ \Comment{111 bits}
 \EndFor
 \end{algorithmic}
@@ -186,7 +191,7 @@ SOSEMANUK &
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
 \State $(s_1,s_2,\dots,s_{93}) \gets (K_1,\dots,K_{80},0,\dots,0)$ \Comment{93 bits}
-\State $(s_{94},s_{95},\dots,s_{177}) \gets (IV_1,\dots,IV_{80},0,\dots,0)$ \Comment{83 bits}
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (IV_1,\dots,IV_{80},0,\dots,0)$ \Comment{84 bits}
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (0,\dots,0,1,1,1)$ \Comment{111 bits}
 \State
 \For{$i=1$ to $4\cdot288$}
@@ -195,20 +200,28 @@ SOSEMANUK &
 \State $t_3 \gets s_{243} + s_{286} \cdot s_{287} + s_{288}+ s_{69}$
 \State
 \State $(s_1,s_2,\dots,s_{93}) \gets (t_3,s_1,\dots,s_{92})$ \Comment{93 bits}
-\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{83 bits}
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{84 bits}
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$ \Comment{111 bits}
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 \end{minipage}
 \end{center}
-
-
-
 \end{frame}
 
-
 \section{Attack Scenario}
+
+\begin{frame}{Stuck-at-0 Faults}
+\begin{itemize}
+\item[$\blacktriangleright$] Injecting stuck-at-0 faults can be done in multiple ways.
+\begin{itemize}
+\item[$\triangleright$] Binary code modification,
+\item[$\triangleright$] FPGA bitsream modification,
+\item[$\triangleright$] EM fault injection, 
+\item[$\triangleright$] Optical fault injection. 
+\end{itemize}
+\end{itemize}
+\end{frame}
 
 \begin{frame}{Assumptions}
 \begin{itemize}[itemsep=0.5cm]
@@ -224,7 +237,7 @@ SOSEMANUK &
 \begin{frame}{Procedure}
 \begin{itemize}[itemsep=0.5cm]
 \item[$\blacktriangleright$] Load fault injected binary onto device.
-\item[$\blacktriangleright$] Run fault injected Trivium to obtain $2^x$ output bits.
+\item[$\blacktriangleright$] Run fault injected Trivium to obtain $\alpha$ output bits.
 \item[$\blacktriangleright$] Cryptanalyse output stream and recover key.
 \item[$\blacktriangleright$] Load original binary onto device.
 \item[$\blacktriangleright$] Future communications can be deciphered as the key is known.
@@ -256,7 +269,7 @@ SOSEMANUK &
 \State $t_3 \gets t_3 + s_{69}$
 \State
 \State $(s_1,s_2,\dots,s_{93}) \gets (t_3,s_1,\dots,s_{92})$ \Comment{93 bits}
-\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{83 bits}
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{84 bits}
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$ \Comment{111 bits}
 \EndFor
 \end{algorithmic}
@@ -274,7 +287,7 @@ SOSEMANUK &
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
 \State $(s_1,s_2,\dots,s_{93}) \gets (K_1,\dots,K_{80},0,\dots,0)$ \Comment{93 bits}
-\State $(s_{94},s_{95},\dots,s_{177}) \gets (IV_1,\dots,IV_{80},0,\dots,0)$ \Comment{83 bits}
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (IV_1,\dots,IV_{80},0,\dots,0)$ \Comment{84 bits}
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (0,\dots,0,1,1,1)$ \Comment{111 bits}
 \State
 \For{$i=1$ to $4\cdot288$}
@@ -283,7 +296,7 @@ SOSEMANUK &
 \State $t_3 \gets s_{243} + s_{288}+ s_{69}$
 \State
 \State $(s_1,s_2,\dots,s_{93}) \gets (t_3,s_1,\dots,s_{92})$ \Comment{93 bits}
-\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{83 bits}
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$ \Comment{84 bits}
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$ \Comment{111 bits}
 \EndFor
 \end{algorithmic}
@@ -335,6 +348,8 @@ nop                 90
 \end{minipage}
 \end{frame}
 
+\section{Cryptanalysis}
+
 \begin{frame}{Key from Initial State}
 \begin{itemize}[itemsep=0.5cm]
 \item[$\blacktriangleright$] Express initial state as a system of 288 linear equations.
@@ -351,9 +366,50 @@ nop                 90
 \end{frame}
 
 \begin{frame}{Initial State from Keystream}
+\mbox{\scriptsize
+${\displaystyle {\overset {\alpha\times 288{\text{ matrix}}}
+{\begin{bmatrix}
+a_{1,1}& \dots & a_{1,93} & b_{1,1} & \dots & b_{1,84} & c_{1,1} & \dots & c_{1,111}\\
+\vdots &  & \vdots & \vdots &  & \vdots & \vdots &  & \vdots\\
+a_{i,1}& \dots & a_{i,93} & b_{i,1} & \dots & b_{i,84} & c_{i,1} & \dots & c_{i,111}\\
+\vdots &  & \vdots & \vdots &  & \vdots & \vdots &  & \vdots\\
+a_{\alpha,1}& \dots & a_{\alpha,93} & b_{\alpha,1} & \dots & b_{\alpha,84} & c_{\alpha,1} & \dots & c_{\alpha,111}\\
+\end{bmatrix}}}
+{\overset {288\times 1{\text{ matrix}}}
+{\begin{bmatrix}
+s_{1} \\
+\vdots \\
+s_{288} \\
+\end{bmatrix}}}
+=
+{\overset {\alpha\times 1{\text{ matrix}}}
+{\begin{bmatrix}
+z_{1} \\
+\vdots \\
+z_{i} \\
+\vdots \\
+z_{\alpha} \\
+\end{bmatrix}}}}
+$}
 
-TODO
+\begin{itemize}[itemsep=0.25cm]
+\item[$\triangleright$] $\alpha$ = a time step
+\item[$\triangleright$] $a, b, c$ = LFSR 1, 2, 3
+\item[$\triangleright$] $s_1,...,s_{288}$ = state variables
+\item[$\triangleright$] $z_1,...,z_{\alpha}$ = output bits
+\end{itemize}
+\end{frame}
 
+\section{Summary}
+
+\begin{frame}{Summary}
+\begin{itemize}[itemsep=0.5cm]
+\item[$\blacktriangleright$] Stuck-at-0 fault injection attack on binary code.
+\item[$\blacktriangleright$] Modify $3 \times 3$ x86 assembly instructions.
+\item[$\blacktriangleright$] Injecting stuck-at-0 faults can be done in multiple ways.
+\item[$\blacktriangleright$] Reduce the non-linear feedback function to a linear one.
+\item[$\blacktriangleright$] The Internal State and Key can be retrieved. 
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Acknowledgements}
