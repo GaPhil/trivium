@@ -2,7 +2,6 @@
 \IEEEoverridecommandlockouts
 \usepackage{fancyhdr}
 
-
 % Phil's macros
 % Create code font alias
 \usepackage{tikz}
@@ -93,7 +92,6 @@ identifierstyle=\color{blue},
 stringstyle=\color{orange},
 columns=fullflexible,
 }
-
 
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
 \usepackage{cite}
@@ -358,32 +356,53 @@ Procedure
 The official C code authored by Christophe De Canni\`ere can be found on  
 
 In the C code the \code{UPDATE()} macro originally does the following
-\begin{lstlisting}[style=snippet]
+\begin{figure}
+\begin{lstlisting}[style=snippet, frame=tlrb]
 #define UPDATE()
-do { 
-T(1) = S64(1, 66) ^ S64(1, 93);
-T(2) = S64(2, 69) ^ S64(2, 84);
-T(3) = S64(3, 66) ^ S96(3, 111);
+  do { 
+    T(1) = S64(1, 66) ^ S64(1, 93);
+    T(2) = S64(2, 69) ^ S64(2, 84);
+    T(3) = S64(3, 66) ^ S96(3, 111);
 
-Z(T(1) ^ T(2) ^ T(3));
+    Z(T(1) ^ T(2) ^ T(3));
 
-T(1) ^= (S64(1, 91) & S64(1, 92)) ^ S64(2, 78); 
-T(2) ^= (S64(2, 82) & S64(2, 83)) ^ S64(3, 87); 
-T(3) ^= (S96(3, 109) & S96(3, 110)) ^ S64(1, 69); 
-} while (0)
+    T(1) ^= (S64(1, 91) & S64(1, 92)) ^ S64(2, 78); 
+    T(2) ^= (S64(2, 82) & S64(2, 83)) ^ S64(3, 87); 
+    T(3) ^= (S96(3, 109) & S96(3, 110)) ^ S64(1, 69); 
+  } while (0)
 \end{lstlisting}
+\caption{Original \code{UPDATE} Macro}
+\end{figure}
+
 However, our fault injection is done as follows in the C code.
-\begin{lstlisting}[style=snippet]
+\begin{figure}
+\begin{lstlisting}[style=snippet, frame=tlrb]
 #define UPDATE()
-do {
-.       .       .
-.       .       .
-.       .       .
-T(1) ^= S64(1, 91) ^ S64(2, 78); 
-T(2) ^= S64(2, 82) ^ S64(3, 87); 
-T(3) ^= S96(3, 109) ^ S64(1, 69); 
-} while (0)
+  do {
+    .       .       .
+    .       .       .
+    .       .       .
+    T(1) ^= S64(1, 91) ^ S64(2, 78); 
+    T(2) ^= S64(2, 82) ^ S64(3, 87); 
+    T(3) ^= S96(3, 109) ^ S64(1, 69); 
+  } while (0)
 \end{lstlisting}
+\caption{Modified \code{UPDATE} Macro}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. This means that when disassembling the \code{trivium.o} object file 
 
@@ -477,7 +496,6 @@ SOSEMANUK &
 \section{Binary Code Modification}
 
 \begin{figure}
-\begin{minipage}{0.45\textwidth}
 \begin{lstlisting}[style=asm, frame=tlrb]
 <_ECRYPT_ivsetup>
 and    %esi,%edx    21 f2
@@ -496,12 +514,10 @@ and    %ecx,%eax    21 c8
 and    %eax,%r15d   41 21 c7
 <...>
 \end{lstlisting}
-\end{minipage}
 \caption{Original Binary Code}
 \end{figure}
 
 \begin{figure}
-\begin{minipage}{0.45\textwidth}
 \begin{lstlisting}[style=asm, frame=tlrb]
 <_ECRYPT_ivsetup>
 xor    %esi,%esi    33 f6
@@ -520,7 +536,6 @@ xor    %ecx,%ecx    33 c9
 xor    %eax,%eax    33 c0
 nop                 90
 \end{lstlisting}
-\end{minipage}
 \caption{Modified Binary Code}
 \end{figure}
 
