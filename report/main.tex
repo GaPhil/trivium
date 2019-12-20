@@ -1,6 +1,7 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 \usepackage{fancyhdr}
+\usepackage[english]{babel}
 
 % Phil's macros
 % Create code font alias
@@ -18,8 +19,6 @@
 \renewcommand\algorithmicdo{}
 \renewcommand\algorithmicthen{}
 \setlength{\parindent}{0em}
-\usepackage{natbib}
-\bibliographystyle{unsrt}
 
 \pagestyle{fancy}
 \fancyhead{}
@@ -174,18 +173,31 @@ Thus, significantly increasing the attack surface for adversaries to mount attac
 Stream Ciphers offer an attractive trade-off between lightweight crypto primitives and security in 
 
 
-\section{Previous attacks on Trivium}
-
-In this section we aim to give a brief outline of some of the attacks aimed at Trivium 
-
-
-
+\begin{itemize}
+\item[$\blacktriangleright$] A network is only as secure as its weakest link.
+\item[$\blacktriangleright$] 23.3 billion IoT devices by 2023.
+\item[$\blacktriangleright$] Need for securing IoT devices.
+\begin{itemize}[itemsep=0.25cm]
+\item[$\triangleright$] DDoS attacks e.g. Dyn cyberattack 2016.
+\end{itemize}
+\item[$\blacktriangleright$] Require energy efficient ciphers.
+\end{itemize}
 
 \section{Background}
 
-As a result of the failures of all six stream ciphers submitted to the NESSIE (New European Schemes for Signatures, Integrity and Encryption) project, in 2004 the eSTREAM project was launched in order to \textit{"identify new stream ciphers suitable for widespread adoption"}\cite{call}.
+As a result of the failures of all six stream ciphers submitted to the NESSIE (New European Schemes for Signatures, Integrity and Encryption) project, the eSTREAM project was launched in 2004 in order to \textit{"identify new stream ciphers suitable for widespread adoption"} \cite{call}. As a result, a portfolio of new stream ciphers was announced in April 2008. The portfolio was revised in September 2008, and currently consist of seven stream ciphers.
 
+\begin{tabular}{l|l}
+Profile 1 (software) & Profile 2 (hardware)\\\hline
+HC-128 & Grain\\
+Rabiit & MICKEY\\
+Salsa20 & Trivium\\
+SOSEMANUK &
+\end{tabular}
 
+\section{Previous attacks on Trivium}
+
+In this section we aim to give a brief outline of some of the attacks aimed at Trivium 
 
 
 
@@ -195,7 +207,7 @@ As a result of the failures of all six stream ciphers submitted to the NESSIE (N
 
 Trivium is a synchronous stream cipher using an 80-bit key and a 80-bit initialisation vector (IV). The secret internal state consists of 288 bits and is made up of 3 registers of length 93, 84 and 111 bits. The cipher operation essentially consists of two phases; the key and IV setup as well as the keystream generation, which are described in Section \ref{sec:key-iv-o} and Section \ref{sec:key-gen-o} respectively.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.45\textwidth]{figures/round.png}
 \caption{Trivium \cite{circle}}
@@ -248,7 +260,7 @@ The key is loaded into the first eighty bits of the first register, whilst the I
 \caption{Original Key and IV Setup}
 \end{algorithm}
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includestandalone[width=0.45\textwidth]{figures/original}
 \caption{Original Trivium}
@@ -335,7 +347,7 @@ Procedure
 \caption{Modified Key and IV Setup}
 \end{algorithm}
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includestandalone[width=0.45\textwidth]{figures/modified}
 \caption{Modified Trivium}
@@ -350,13 +362,12 @@ Procedure
 
 
 
-\section{Ease of Use}
+\section{Code Analysis}
 
-\subsection{Code Analysis}
 The official C code authored by Christophe De Canni\`ere can be found on  
 
 In the C code the \code{UPDATE()} macro originally does the following
-\begin{figure}
+\begin{figure}[H]
 \begin{lstlisting}[style=snippet, frame=tlrb]
 #define UPDATE()
   do { 
@@ -374,8 +385,8 @@ In the C code the \code{UPDATE()} macro originally does the following
 \caption{Original \code{UPDATE} Macro}
 \end{figure}
 
-However, our fault injection is done as follows in the C code.
-\begin{figure}
+Performing the modification in the C code will change multiple instructions and the code will not be of the same length as the original.
+\begin{figure}[H]
 \begin{lstlisting}[style=snippet, frame=tlrb]
 #define UPDATE()
   do {
@@ -409,8 +420,8 @@ The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT
 We run the fault injected code using the following key \code{0x0F62B5085BAE0154A7FA} and IV \code{0x288FF65DC42B92F960C7}. Using the Berlekamp–Massey algorithm \cite{massey} we find the shortest linear feedback register (LFSR) for the given bitstream. The polynomial is
 $x^{61} + x^{60} + x^{55} + x^{54} + x^{52} + x^{51} + x^{46} + x^{45} + x^{43} + x^{42} + x^{41} + x^{40} + x^{39} + x^{38} + x^{37} + x^{36} + x^{35} + x^{31} + x^{28} + x^{25} + x^{24} + x^{23} + x^{20} + x^{19} + x^{18} + x^{11} + x^8 + x^7 + 1$.
 
-original
-\begin{lstlisting}[style=hex]
+\begin{figure}[H]
+\begin{lstlisting}[style=hex, frame=tlrb]
 ........ EA0421F2 894DBC89 ........ 0FA4F80D
 31D121F0 448B65C8 ........ 6DCC440F A4EB1B21
 C74431D3 31FB895D ........ 89D30FA4 F30421C3
@@ -419,9 +430,11 @@ C74431D3 31FB895D ........ 89D30FA4 F30421C3
 ........ F24589E7  F10E4121 F9448975 C8440FA4
 ........ 410FA4D7 124121C7 ........  ........
 \end{lstlisting}
+\caption{Original Binary Code}
+\end{figure}
 
-modified
-\begin{lstlisting}[style=hex]
+\begin{figure}[H]
+\begin{lstlisting}[style=hex, frame=tlrb]
 ........ EA0433F6 894DBC89 ........ 0FA4F80D 
 31D133F6 448B65C8 ........ 6DCC440F A4EB1B33
 C04431D3 31FB895D ........ 89D30FA4 F30433C0 
@@ -430,6 +443,8 @@ C04431D3 31FB895D ........ 89D30FA4 F30433C0
 ........ F24589E7 F10E33FF 90448975 C8440FA4 
 ........ 410FA4D7 1233C090 ........  ........
 \end{lstlisting}
+\caption{Modified Binary Code}
+\end{figure}
 
 
 
@@ -438,7 +453,7 @@ modified
 \newcommand{\hf}{\makebox[0pt][l]{\color{green}\rule[-3pt]{0.08\linewidth}{11pt}}}
 \newcommand{\ha}{\makebox[0pt][l]{\color{green}\rule[-3pt]{0.04\linewidth}{11pt}}}
 
-\begin{lstlisting}[style=hex,escapechar=\%]
+\begin{lstlisting}[style=hex, frame=tlrb, escapechar=\%]
 1a) ORIG:...    EA0421F2 ........ 31D121F0 ........
 1b) MOD:....     EA04%\hf%33F6 ........ 31D1%\hf%33F6  ........
 
@@ -466,36 +481,11 @@ So in our case finding the solution takes at most $288^{2.376} \leq 697,456$ ope
 \subsection{presentation}
 
 
-\begin{itemize}
-\item[$\blacktriangleright$] A network is only as secure as its weakest link.
-\item[$\blacktriangleright$] 23.3 billion IoT devices by 2023.
-\item[$\blacktriangleright$] Need for securing IoT devices.
-\begin{itemize}[itemsep=0.25cm]
-\item[$\triangleright$] DDoS attacks e.g. Dyn cyberattack 2016.
-\end{itemize}
-\item[$\blacktriangleright$] Require energy efficient ciphers.
-\end{itemize}
-
-\begin{itemize}
-\item[$\blacktriangleright$] \textbf{eSTREAM project} - 2004
-\begin{itemize}
-\item Organised by ECRYPT to \textit{"identify new stream ciphers suitable for widespread adoption"}.
-\end{itemize}
-\item[$\blacktriangleright$] \textbf{eSTREAM portfolio} - 2008/2011
-\begin{tabular}{l|l}
-Profile 1 (software) & Profile 2 (hardware)\\\hline
-HC-128 & Grain\\
-Rabiit & MICKEY\\
-Salsa20 & Trivium\\
-SOSEMANUK &
-\end{tabular}
-\end{itemize}
-
 \section{Fault Injection}
 
 \section{Binary Code Modification}
 
-\begin{figure}
+\begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
 <_ECRYPT_ivsetup>
 and    %esi,%edx    21 f2
@@ -514,10 +504,10 @@ and    %ecx,%eax    21 c8
 and    %eax,%r15d   41 21 c7
 <...>
 \end{lstlisting}
-\caption{Original Binary Code}
+\caption{Original Assembly Code}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
 <_ECRYPT_ivsetup>
 xor    %esi,%esi    33 f6
@@ -536,7 +526,7 @@ xor    %ecx,%ecx    33 c9
 xor    %eax,%eax    33 c0
 nop                 90
 \end{lstlisting}
-\caption{Modified Binary Code}
+\caption{Modified Assembly Code}
 \end{figure}
 
 \section{Cryptanalysis}
@@ -585,8 +575,8 @@ $}
 \begin{itemize}
 \item[$\triangleright$] $\alpha$ = a time step
 \item[$\triangleright$] $a, b, c$ = LFSR 1, 2, 3
-\item[$\triangleright$] $s_1,...,s_{288}$ = state variables
-\item[$\triangleright$] $z_1,...,z_{\alpha}$ = output bits
+\item[$\triangleright$] $s_1,\dots,s_{288}$ = state variables
+\item[$\triangleright$] $z_1,\dots,z_{\alpha}$ = output bits
 \end{itemize}
 
 \section{Summary}
@@ -604,8 +594,8 @@ Summary
 
 I would like to thank Elena Dubrova for the idea and her support throughout this project. I'd also like to extend my gratitude towards Per Austrin for making it possible. Daniel Skantz for the invaluable conversations.
 
-\section{sources}
-\bibliography{bibl-rep}
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,bibl-rep}
 \nocite{*}
 
 \end{document}
