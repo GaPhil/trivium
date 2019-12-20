@@ -10,6 +10,12 @@
 \usepackage{xcolor}
 \newcommand{\code}[1]{\texttt{#1}}
 \usepackage{minted}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usemintedstyle{trac}
+\renewcommand\algorithmicdo{}
+\renewcommand\algorithmicthen{}
 
 
 \lstdefinestyle{customc}{
@@ -289,6 +295,150 @@ So in our case finding the solution takes at most $288^{2.376} \leq 697,456$ ope
 
 
 \subsection{Unwinding the bitstream}
+
+
+
+
+
+
+
+\subsection{presentation}
+
+
+\begin{itemize}
+\item[$\blacktriangleright$] A network is only as secure as its weakest link.
+\item[$\blacktriangleright$] 23.3 billion IoT devices by 2023.
+\item[$\blacktriangleright$] Need for securing IoT devices.
+\begin{itemize}[itemsep=0.25cm]
+\item[$\triangleright$] DDoS attacks e.g. Dyn cyberattack 2016.
+\end{itemize}
+\item[$\blacktriangleright$] Require energy efficient ciphers.
+\end{itemize}
+
+\begin{itemize}
+\item[$\blacktriangleright$] \textbf{eSTREAM project} - 2004
+\begin{itemize}
+\item Organised by ECRYPT to \textit{"identify new stream ciphers suitable for widespread adoption"}.
+\end{itemize}
+\item[$\blacktriangleright$] \textbf{eSTREAM portfolio} - 2008/2011
+\begin{table}
+\centering
+\begin{tabular}{l|l}
+Profile 1 (software) & Profile 2 (hardware)\\\hline
+HC-128 & Grain\\
+Rabiit & MICKEY\\
+Salsa20 & Trivium\\
+SOSEMANUK &
+\end{tabular}
+\end{table}
+\end{itemize}
+
+\begin{itemize}
+\item[$\blacktriangleright$] Key: 80-bit key
+\item[$\blacktriangleright$] Initialisation Vector: 80-bit
+\item[$\blacktriangleright$] Output: $\leq2^{64}-bit$
+\item[$\blacktriangleright$] Internal State: 288-bit
+\item[$\blacktriangleright$] 3 shift registers:
+\begin{itemize}
+\item a) 93-bit
+\item b) 84-bit
+\item c) 111-bit
+\end{itemize}
+\end{itemize}
+\includegraphics[width=0.4\textwidth]{figures/round.png}\cite{circle}
+
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\For{$i=1$ to $N$} \Comment{$N\leq 2^{64}$}
+\State $t_1 \gets s_{66} + s_{93}$
+\State $t_2 \gets s_{162} + s_{177}$
+\State $t_3 \gets s_{243} + s_{288}$
+\State
+\State $z_i \gets t_1 + t_2 + t_3$
+\State
+\State $t_1 \gets t_1 + s_{91} \cdot s_{92} + s_{171}$
+\State $t_2 \gets t_2 + s_{175} \cdot s_{176} + s_{264}$
+\State $t_3 \gets t_3 + s_{286} \cdot s_{287} + s_{69}$
+\State
+\State $(s_1,s_2,\dots,s_{93}) \gets (t_3,s_1,\dots,s_{92})$
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$
+\State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+Key and IV setup
+\begin{itemize}
+\item[$\blacktriangleright$] Run over 4 full cycles
+\end{itemize}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\State $(s_1,s_2,\dots,s_{93}) \gets (K_1,\dots,K_{80},0,\dots,0)$
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (IV_1,\dots,IV_{80},0,\dots,0)$
+\State $(s_{178},s_{179},\dots,s_{288}) \gets (0,\dots,0,1,1,1)$
+\State
+\For{$i=1$ to $4\cdot288$}
+\State $t_1 \gets s_{66} + s_{91} \cdot s_{92} + s_{93} + s_{171}$
+\State $t_2 \gets s_{162} + s_{175} \cdot s_{176} + s_{177} + s_{264}$
+\State $t_3 \gets s_{243} + s_{286} \cdot s_{287} + s_{288}+ s_{69}$
+\State
+\State $(s_1,s_2,\dots,s_{93}) \gets (t_3,s_1,\dots,s_{92})$
+\State $(s_{94},s_{95},\dots,s_{177}) \gets (t_1,s_{94},\dots,s_{176})$
+\State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+\section{Attack Scenario}
+
+Stuck-at-0 Faults
+\begin{itemize}
+\item[$\blacktriangleright$] Injecting stuck-at-0 faults can be done in multiple ways.
+\begin{itemize}
+\item[$\triangleright$] Binary code modification,
+\item[$\triangleright$] FPGA bitsream modification,
+\item[$\triangleright$] EM fault injection, 
+\item[$\triangleright$] Optical fault injection. 
+\end{itemize}
+\end{itemize}
+
+
+Assumptions
+\begin{itemize}
+\item[$\blacktriangleright$] Physical access to device; e.g. during shipment.
+\item[$\blacktriangleright$] Proprietary protection mechanism, preventing arbitrary code from being run.
+\item[$\blacktriangleright$] Code being executed on device is not signed.
+\item[$\blacktriangleright$] Lock bits need to protect against read-back are not set.
+\item[$\blacktriangleright$] Key is securely stored and cannot be obtained with ease.
+\item[$\blacktriangleright$] Key is reused.
+\end{itemize}
+
+
+Procedure
+\begin{itemize}
+\item[$\blacktriangleright$] Load fault injected binary onto device.
+\item[$\blacktriangleright$] Run fault injected Trivium to obtain $\alpha$ output bits.
+\item[$\blacktriangleright$] Cryptanalyse output stream and recover key.
+\item[$\blacktriangleright$] Load original binary onto device.
+\item[$\blacktriangleright$] Future communications can be deciphered as the key is known.
+\end{itemize}
+
+\section{Fault Injection}
+
+Fault Injection
+\begin{figure}
+\includestandalone[width=0.45\textwidth]{figures/modified}
+\end{figure}
+
+
+
+
+
+
+
+
 
 
 
