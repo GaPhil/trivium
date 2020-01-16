@@ -1,7 +1,11 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 \usepackage{fancyhdr}
-\usepackage[english]{babel}
+\usepackage[british]{babel}
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
 
 % Phil's macros
 % Create code font alias
@@ -113,18 +117,6 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \textit{Theoretical Computer Science} \\
 Stockholm, Sweden \\
 gajland@kth.se}
-% \and
-% \IEEEauthorblockN{Daniel Skantz}
-% \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-% \textit{Theoretical Computer Science} \\
-% Stockholm, Sweden \\
-% danska@kth.se}
-% \and
-% \IEEEauthorblockN{Elena Dubrova}
-% \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-% \textit{Electronic Systems Design} \\
-% Stockholm, Sweden \\
-% dubrova@kth.se}
 }
 
 \maketitle
@@ -134,7 +126,7 @@ As the Internet of Things (IoT) continues to gain traction, so does the need for
 
 The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. 
 
-In this paper we study the design choices made by the authors of Trivium in order to demonstrate a fault attack on the software implementation of the cipher. Whilst Trivium maintains most desirable cryptographic properties, a simple design was chosen by the authors to provide flexibility. Our attack works by modifying the compiled binary at targeted positions to introduce stuck-at-0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher. In turn, extraction of the 80-bit key becomes tractable.
+In this paper we study the design choices made by the authors of Trivium in order to demonstrate a fault attack on the software implementation of the cipher. Whilst Trivium maintains most desirable cryptographic properties, a simple design was chosen by the authors to provide flexibility. Our non-invasive attack works by modifying the compiled binary at targeted positions to introduce stuck-at-0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher. In turn, extraction of the 80-bit key becomes tractable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -146,7 +138,9 @@ As the Internet of Things (IoT) continues to gain traction, so does the need for
 
 The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. In this paper we analyse the design choices made by the authors of Trivium, in order to reveal a new class of vulnerabilities in the cipher. We go on to demonstrate a fault attack on the software implementation of Trivium. The attack works by modifying compiled binaries at targeted positions to introduce stuck at 0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher and in turn extraction of the 80-bit key becomes tractable.
 
-\section{Background}
+The remainder of the paper is structured as follows. We start by giving a brief introduction to the eSTREAM project and Trivium's roots in Section \ref{sec:background}. Section \ref{sec:previous-work} gives an outline to some previous work. Section \ref{sec:spec} provides details to the Trivium design specification. Section \ref{sec:fault-inj} describes the fault injection attack. An analysis of the code and details as to how the attack is mounted is covered in Section \ref{sec:code}. A brief cryptanalysis follows in Section \ref{sec:cryptanalysis}.
+
+\section{Background}\label{sec:background}
 
 As a result of the failures of all six stream ciphers submitted to the NESSIE (New European Schemes for Signatures, Integrity and Encryption) project, the eSTREAM project was launched in 2004 in order to \textit{"identify new stream ciphers suitable for widespread adoption"} \cite{call}. Four years later, a portfolio of new stream ciphers was announced in April 2008. The portfolio was revised in September 2008, and currently consist of seven stream ciphers [See Table \ref{tab:portfolio}], divided into two profiles, hardware and software. The book entitled \textit{New Stream Cipher Designs - The eSTREAM Finalists} \cite{book} was published by Springer in 2008 and provides full specifications of all 16 ciphers that reached the final phase of the eSTREAM project.
 \begin{table}[H]
@@ -162,7 +156,7 @@ SOSEMANUK & \\\hline
 \label{tab:portfolio}
 \end{table}
 
-\section{Previous Work}
+\section{Previous Work}\label{sec:previous-work}
 
 In this section we aim to give an outline of some of the attacks aimed at Trivium. 
 P. Hawkes and G. Rose showed guess-and-determine (GD) attacks on the SNOW stream cipher. A GD attack \textit{guesses} some internal values and then exploits the relationships to \textit{determine} other internal values; hence the name. However, this kind of attack is most suitable for word-oriented stream ciphers. The first attack has a data complexity of $\mathcal{O}(2^{64})$ and a process complexity of $\mathcal{O}(2^{256})$. The second attack has a process complexity of $\mathcal{O}(2^{224})$, and a data complexity of $\mathcal{O}(2^{95})$.\cite{Hawkes2003}
@@ -189,7 +183,7 @@ Their attack algorithm can be described as follows \cite{Hojsik2008}:
 
 In 2012 Y. Hu et al. presented a fault analysis of Trivium \cite{Hu2012}. By observing an average of $195 \times 17$ key-stream bits, the attacker can break Trivium with a repeated number of injections. 
 
-\section{Trivium Design Specification}
+\section{Trivium Design Specification}\label{sec:spec}
 
 Trivium is a synchronous stream cipher using an 80-bit key and a 80-bit initialisation vector (IV). The secret internal state consists of 288 bits and is made up of 3 registers of length 93, 84 and 111 bits. The cipher operation essentially consists of two phases; the key and IV setup as well as the keystream generation, which are described in Section \ref{sec:key-iv-o} and Section \ref{sec:key-gen-o} respectively.
 
@@ -201,7 +195,7 @@ Trivium is a synchronous stream cipher using an 80-bit key and a 80-bit initiali
 \end{figure}
 
 \subsection{Keystream Generation}\label{sec:key-gen-o}
-The keystream is generated as a linear combination of the three registers, $t_1\oplus t_2\oplus t_3=z_i$. At each clock cycle, three bits are update using a non-linear feedback function, whilst one output bit $z_i$ is obtained. The authors state in the cipher specification, that $2^{64}$ keystream bits can be obtained from a given Key/IV pair.
+The keystream is generated as a linear combination of the three registers, $t_1\oplus t_2\oplus t_3=z_i$. At each clock cycle, three bits are updated using a non-linear feedback function, whilst one output bit $z_i$ is obtained [See Figure \ref{fig:original}]. The authors state in the cipher specification, that $2^{64}$ keystream bits can be obtained from a given Key/IV pair.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -225,7 +219,7 @@ The keystream is generated as a linear combination of the three registers, $t_1\
 \end{algorithm}
 
 \subsection{Key and IV Setup}\label{sec:key-iv-o}
-The key is loaded into the first eighty bits of the first register, whilst the IV is loaded into the first eighty bits of the second register. All remaining bits are set to zero, with the exception of bits $s_{286},s_{287},s_{288}$ which are set to 1. The instillation stage requires $4*288=1152$ steps and is similar to the keystream generation, except that there are no output bits.
+The key is loaded into the first eighty bits of the first register, whilst the IV is loaded into the first eighty bits of the second register. All remaining bits are set to zero, with the exception of bits $s_{286},s_{287},s_{288}$ which are set to 1. The initialisation stage requires $4*288=1152$ steps and is similar to the keystream generation, except that there are no output bits.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -253,19 +247,19 @@ The key is loaded into the first eighty bits of the first register, whilst the I
 \label{fig:original}
 \end{figure}
 
-\section{Fault Injection}
+\section{Fault Injection}\label{sec:fault-inj}
 
 \subsection{Attack Scenario and Assumptions}
 
-We assume that we have physical access to the device running Trivium. Given today's global supply chain, this is a reasonable assumptions. Packages can easily be intercepted and tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications on the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run singed code, since this would be too bulky in these use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore, since keys are reused for stream ciphers but IVs are publicly known, once the key has been retrieved all future communications can be compromised. 
+We assume that we have physical access to the device running Trivium. Given today's global supply chain, packages can easily be intercepted and tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications to the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run singed code, since this would be too much overhead fur such use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore, since keys are reused for stream ciphers but IVs are publicly known, once the key has been retrieved all future communications can be compromised. 
 
-The attack would be carried out in the following steps. Initially the binary would be extracted from the micro-controller and replace with the fault injected binary. The fault injected Trivium would then be run to obtain $\alpha$ output bits. The output stream would then be cryptanalysed as described in Section \ref{sec:cryptanalysis} in order to recover the key. Finally, the original binary would be loaded back onto the device. Since the IV is publicly known and the key is reused, all future communications can be deciphered.
+The attack would be carried out in the following steps. Initially the binary would be extracted from the micro-controller and replaced with the fault injected binary. The fault injected Trivium would then be run to obtain $\alpha$ output bits. The output stream would then be cryptanalysed as described in Section \ref{sec:cryptanalysis} in order to recover the key. Finally, the original binary would be loaded back onto the device. Since the IV is publicly known and the key is reused, all communications using that device can be deciphered.
 
 \subsection{Stuck-at Fault}
 
 As previously mentioned, Trivium benefits from a non-linear feedback function. In order to reduce this to a linear feedback function, we want to effectively remove the AND gates. This can be done by injecting a stuck-at-0 fault. Furthermore, the following XOR gate can effectively be ignored, since $A\oplus0=A$. The injection of such a fault can be done in numerous ways, such as modifying the binary code executed by the micro-controller. In the case of a hardware implementation, the FPGA bitsream could be modified whilst loading a design onto the chip. Other alternatives include EM fault injections or optical fault injections.
 
-\section{Code Analysis}
+\section{Code Analysis}\label{sec:code}
 
 We start by analysing the official C code authored by Christophe De Canni\`ere which can be found on the eSTREAM website. The relevant parts of the code are all contained in the \code{UPDATE()} macro [See Figure \ref{orig:macro}].
 
@@ -288,12 +282,12 @@ We start by analysing the official C code authored by Christophe De Canni\`ere w
 \end{figure}
 
 The key generation function is a linear combination of the bits $t_1, t_2$ and $t_3$.
-The three original feedback functions are of the following form: $$t_i \gets t_i \oplus ((s_I \odot s_{II}) \oplus s_{III})$$ However, we with to reduce the non-linear feedback function to a linear. This can be done by introducing a stuck-at-o fault in the following way:
+The three original feedback functions are of the following form: $$t_i \gets t_i \oplus ((s_I \odot s_{II}) \oplus s_{III})$$ However, we wish to reduce the non-linear feedback function to a linear one. This can be done by introducing a stuck-at-o fault in the following way:
 \begin{align*}
 t_i &\gets t_i \oplus ((0) \oplus s_{III})\\
 t_i &\gets t_i \oplus (s_{III})
 \end{align*}
-Performing the modification in the C code will change multiple instructions and the code will not be of the same length as the original. It is unlikely that arbitrary code modifications will be accepted by a micro-controller. Rather minimal adjustments to the binary code can be made.
+Performing the modification in the C code [See Figure \ref{modified-macro}] will change multiple assembly instructions and the code will not be of the same length as the original. It is unlikely that arbitrary code modifications will be accepted by a micro-controller. Therefore we aim to make minimal adjustments to the binary code.
 \begin{figure}[H]
 \begin{lstlisting}[style=snippet, frame=tlrb]
 #define UPDATE()
@@ -307,10 +301,12 @@ Performing the modification in the C code will change multiple instructions and 
   } while (0)
 \end{lstlisting}
 \caption{Modified \code{UPDATE} Macro}
+\label{modified-macro}
 \end{figure}
 
 \subsection{Assembly Code}
-The original binary code can be disassembled in order to pinpoint the location of the \code{and} instructions. Essentially three instructions need to be modified as detailed above. However, the code was implemented using macros and these perform replacement of the text. The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. Thus, the three instructions need to be modified in three different places of the binary. As described above, we will introduce the fault using \code{xor \%dst, \%dst}. \code{21} represents the opcode for the \code{xor} instruction in the x86 instruction set. The following byte is needed for specifying the source and destination register. The least significant 32 bits of the used registers are available via a \code{d} suffix, requiring the extra byte \code{41}.
+The original binary code can be disassembled in order to pinpoint the location of the \code{and} instructions [See Figure \ref{fig:orgi-asm}].
+Essentially three instructions need to be modified as detailed above. However, the code was implemented using macros and these perform replacement of the text. The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. Thus, the three instructions need to be modified in three different places of the binary. As described above, we will introduce the fault using \code{xor \%dst, \%dst}. \code{21} represents the opcode for the \code{xor} instruction in the x86 instruction set. The following byte is needed for specifying the source and destination register. The least significant 32 bits of the used registers are available via a \code{d} suffix, requiring the extra byte \code{41}.
 \begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
 <_ECRYPT_ivsetup>
@@ -333,7 +329,7 @@ and    %eax,%r15d   41 21 c7
 \caption{Original Assembly Code}\label{fig:orgi-asm}
 \end{figure}
 
-If we inject the fault using \code{xor} instructions instead of \code{and} instructions, we will be short of 3 bytes, since we do not require the least significant bits from the \code{\%r15d} and \code{\%r9d} register. When linking a modified object file in which the length has not been preserved, linking fails with: \code{ld: malformed nlist string offset file 'trivium.o'\\clang: error: linker command failed with exit code 1 (use -v to see invocation)}. In order to combat this we add 3 \code{nop} instructions that preserve the total byte length of the object code [See Figure \ref{fig:mod-asm}].
+If we inject the fault using \code{xor} instructions instead of \code{and} instructions, we will be short of 3 bytes, since we do not require the least significant bits from the \code{\%r15d} and \code{\%r9d} registers. When linking a modified object file in which the length has not been preserved, linking fails with: \code{ld: malformed nlist string offset file 'trivium.o'. clang: error: linker command failed with exit code 1 (use -v to see invocation)}. In order to combat this we add 3 \code{nop} instructions that preserve the total byte length of the object code [See Figure \ref{fig:mod-asm}].
 
 \begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
@@ -357,63 +353,20 @@ nop                 90
 \caption{Modified Assembly Code}\label{fig:mod-asm}
 \end{figure}
 
-TODO//TODO//TODO
+It follows that the binary has been modified in a minimal number of places [See Figure \ref{fig:diff}].
 
 \begin{figure}[H]
-\begin{lstlisting}[style=hex, frame=tlrb]
-........ EA0421F2 894DBC89 ........ 0FA4F80D
-31D121F0 448B65C8 ........ 6DCC440F A4EB1B21
-C74431D3 31FB895D ........ 89D30FA4 F30421C3
-448B5DC8 ........ E0440FA4 F00921DF 89C34431
-........ 13450FA4 E7124121 C74489C0 4131CF45
-........ F24589E7  F10E4121 F9448975 C8440FA4
-........ 410FA4D7 124121C7 ........  ........
-\end{lstlisting}
-\caption{Original Binary Code}
+\centering
+\fbox{\includegraphics[width=0.45\textwidth]{report/figures/diff.png}}
+\caption{Diff: original binary (green) and modified binary (red).}
+\label{fig:diff}
 \end{figure}
 
-\begin{figure}[H]
-\begin{lstlisting}[style=hex, frame=tlrb]
-........ EA0433F6 894DBC89 ........ 0FA4F80D 
-31D133F6 448B65C8 ........ 6DCC440F A4EB1B33
-C04431D3 31FB895D ........ 89D30FA4 F30433C0 
-448B5DC8 ........ E0440FA4 F00933C9 89C34431
-........ 13450FA4 E71233C0 904489C0 4131CF45
-........ F24589E7 F10E33FF 90448975 C8440FA4 
-........ 410FA4D7 1233C090 ........  ........
-\end{lstlisting}
-\caption{Modified Binary Code}
-\end{figure}
-
-
-original
-modified
-\newcommand{\hf}{\makebox[0pt][l]{\color{green}\rule[-3pt]{0.08\linewidth}{11pt}}}
-\newcommand{\ha}{\makebox[0pt][l]{\color{green}\rule[-3pt]{0.04\linewidth}{11pt}}}
-
-\begin{lstlisting}[style=hex, frame=tlrb, escapechar=\%]
-1a) ORIG:...    EA0421F2 ........ 31D121F0 ........
-1b) MOD:....     EA04%\hf%33F6 ........ 31D1%\hf%33F6  ........
-
-2a)  A4EB1B21 C74431D3 ........ F30421C3 ........
-2b)  A4EB1B%\ha%33 %\ha%C04431D3 ........ F304%\hf%33C0 ........
-
-3a) ........ F00921DF ........ E7124121 C74489C0
-3b) ........ F009%\hf%33C9 ........ E712%\hf%33C0 %\ha%904489C0 
-
-4a) ........ F10E4121 F9448975 ........ F00D21C8
-
-124121C7
-4b) ........ F10E%\hf%33FF %\ha%90448975 ........ F00D33C9
-
-12%\hf%33C0%\ha%90
-\end{lstlisting}
-
-A linear system with $k$ variables can be solved in time $k^\omega$, where $\omega \leq 2.376$.
-So in our case finding the solution takes at most $288^{2.376} \leq 697,456$ operations
-
+After injecting the faults as described above, both the keystream generation algorithm as well as the key and IV setup are no longer non-linear [See Figure \ref{fig:modified}]. 
 
 \subsection{Keystream Generation}
+
+After the modifications the keystream remains a linear combination of the three registers, $t_1 \oplus t_2 \oplus t_3 = z_i$. However, at each clock cycle, three bits are updated using a linear feedback function, whist one output bit $z_i$ is obtained [See Figure \ref{fig:modified}].
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -437,6 +390,8 @@ So in our case finding the solution takes at most $288^{2.376} \leq 697,456$ ope
 \end{algorithm}
 
 \subsection{Key and IV Setup}
+
+The key and IV setup proceeds as before, requiring $4*288=1152$ steps and giving no output bits.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -464,32 +419,16 @@ So in our case finding the solution takes at most $288^{2.376} \leq 697,456$ ope
 \label{fig:modified}
 \end{figure}
 
-
-
-\subsection{bull shit}
-
-
-We run the fault injected code using the following key \code{0x0F62B5085BAE0154A7FA} and IV \code{0x288FF65DC42B92F960C7}. Using the Berlekamp–Massey algorithm \cite{massey} we find the shortest linear feedback register (LFSR) for the given bitstream. The polynomial is
-$x^{61} + x^{60} + x^{55} + x^{54} + x^{52} + x^{51} + x^{46} + x^{45} + x^{43} + x^{42} + x^{41} + x^{40} + x^{39} + x^{38} + x^{37} + x^{36} + x^{35} + x^{31} + x^{28} + x^{25} + x^{24} + x^{23} + x^{20} + x^{19} + x^{18} + x^{11} + x^8 + x^7 + 1$.
-
-
 \section{Cryptanalysis}\label{sec:cryptanalysis}
 
-Key from Initial State
-\begin{itemize}
-\item[$\blacktriangleright$] Express initial state as a system of 288 linear equations.
-\item[$\blacktriangleright$] Depends on:
-\begin{itemize}
-\item[$\triangleright$] 80 unknown bits from key
-\item[$\triangleright$] 80 known bits from IV
-\item[$\triangleright$] 125 bits set to 0
-\item[$\triangleright$] 3 bits set to 1
-\end{itemize}
-\item[$\blacktriangleright$] A system with $k$ unknown variables can be solved using Gaussian elimination in time $k^\alpha$, where $\alpha\leq 2.376$ \cite{gauss}.
-\item[$\blacktriangleright$] Finding the solution takes at most $80^{2.376} \leq 33,247$ operations.
-\end{itemize}
+In order to obtain the key from the ciphertext, the cryptanalysis is done as follows. If the keystream $ks$ was not directly observed, it can be obtained from the ciphertext $ct$ of a known plain text $pt$. 
+$$ct_i = ks_i \oplus pt_i$$
+$$ks_i = ct_i \oplus pt_i = ks_i \oplus pt_i \oplus pt_i$$
+Once the keystream has been obtained, the cryptanalysis proceeds in two stages; obtaining the keystream from the initial state and finally extracting the key from the initial state.
 
-Initial State from Keystream
+\subsection{Initial State from Keystream}
+
+After recording $\alpha$ bits of the keystream we set up the following system of linear equations, where $a,b$ and $c$ each denote one of the three LFSRs, $s_1,\dots,s_{288}$ are the state variables, and $z_1,\dots,z_{\alpha}$ are the keystream bits. 
 \resizebox{.45\textwidth}{!}{ 
 ${\displaystyle {\overset {\alpha\times 288{\text{ matrix}}}
 {\begin{bmatrix}
@@ -516,30 +455,26 @@ z_{\alpha} \\
 \end{bmatrix}}}}
 $}
 
-\begin{itemize}
-\item[$\triangleright$] $\alpha$ = a time step
-\item[$\triangleright$] $a, b, c$ = LFSR 1, 2, 3
-\item[$\triangleright$] $s_1,\dots,s_{288}$ = state variables
-\item[$\triangleright$] $z_1,\dots,z_{\alpha}$ = output bits
-\end{itemize}
+\subsection{Key from Initial State}
+
+The initial state is then expressed as a system of 288 linear equations, made up from 80 unknown bits from the key, 80 known bits from the IV, 125 bits set to 0, and three bits set to 1. A linear system with $k$ unknown variables can be solved using Gaussian elimination in time $k^\alpha$, where $\alpha\leq 2.376$ \cite{gauss}. Finding the solution takes at most $\mathcal{O}(80^{2.376})$ operations.
+ 
 
 \section{Summary}
 
-Summary
-\begin{itemize}[itemsep=0.5cm]
-\item[$\blacktriangleright$] Stuck-at-0 fault injection attack on binary code.
-\item[$\blacktriangleright$] Modify $3 \times 3$ x86 assembly instructions.
-\item[$\blacktriangleright$] Injecting stuck-at-0 faults can be done in multiple ways.
-\item[$\blacktriangleright$] Reduce the non-linear feedback function to a linear one.
-\item[$\blacktriangleright$] The Internal State and Key can be retrieved. 
-\end{itemize}
+We presented a non-invasive attack on the Trivium stream cipher. The attack introduces a stuck-at-0 fault by modifying a minimal number of bits in the binary code. Our attack reduces the non-line feedback function to a linear one, making retrieval of the internal state and key tractable.
 
 \section*{Acknowledgement}
 
-I would like to thank Elena Dubrova for the idea and her support throughout this project. I'd also like to extend my gratitude towards Per Austrin for making it possible. Daniel Skantz for the invaluable conversations.
+I would like to thank Elena Dubrova for the idea and her support throughout this project. I'd also like to extend my gratitude towards Per Austrin for making this project possible as well as Daniel Skantz for the invaluable conversations.
 
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv,bibl-rep}
 \nocite{*}
 
 \end{document}
+
+
+% \subsection{bull shit}
+
+% We run the fault injected code using the following key \code{0x0F62B5085BAE0154A7FA} and IV \code{0x288FF65DC42B92F960C7}.
