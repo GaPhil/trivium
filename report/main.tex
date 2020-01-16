@@ -185,7 +185,7 @@ In 2012 Y. Hu et al. presented a fault analysis of Trivium \cite{Hu2012}. By obs
 
 \section{Trivium Design Specification}\label{sec:spec}
 
-Trivium is a synchronous stream cipher using an 80-bit key and a 80-bit initialisation vector (IV). The secret internal state consists of 288 bits and is made up of 3 registers of length 93, 84 and 111 bits. The cipher operation essentially consists of two phases; the key and IV setup as well as the keystream generation, which are described in Section \ref{sec:key-iv-o} and Section \ref{sec:key-gen-o} respectively.
+Trivium is a synchronous stream cipher using an 80-bit key and a 80-bit initialisation vector (IV). The secret internal state consists of 288 bits and is made up of 3 registers of length 93, 84 and 111 bits [See Figure \ref{fig:circle}]. The cipher operation essentially consists of two phases; the key and IV setup as well as the keystream generation, which are described in Section \ref{sec:key-iv-o} and Section \ref{sec:key-gen-o} respectively.
 
 \begin{figure}[H]
 \centering
@@ -195,7 +195,7 @@ Trivium is a synchronous stream cipher using an 80-bit key and a 80-bit initiali
 \end{figure}
 
 \subsection{Keystream Generation}\label{sec:key-gen-o}
-The keystream is generated as a linear combination of the three registers, $t_1\oplus t_2\oplus t_3=z_i$. At each clock cycle, three bits are updated using a non-linear feedback function, whilst one output bit $z_i$ is obtained [See Figure \ref{fig:original}]. The authors state in the cipher specification, that $2^{64}$ keystream bits can be obtained from a given Key/IV pair.
+The keystream is generated as a linear combination of the three registers, $t_1\oplus t_2\oplus t_3=z_i$. At each clock cycle, three bits are updated using a non-linear feedback function, whilst one output bit $z_i$ is obtained [See Algorithm \ref{alg:orig} and Figure \ref{fig:original}]. The authors state in the cipher specification, that $2^{64}$ keystream bits can be obtained from a given Key/IV pair.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -215,11 +215,11 @@ The keystream is generated as a linear combination of the three registers, $t_1\
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$
 \EndFor
 \end{algorithmic}
-\caption{Original Keystream Generation}
+\caption{Original Keystream Generation}\label{alg:orig}
 \end{algorithm}
 
 \subsection{Key and IV Setup}\label{sec:key-iv-o}
-The key is loaded into the first eighty bits of the first register, whilst the IV is loaded into the first eighty bits of the second register. All remaining bits are set to zero, with the exception of bits $s_{286},s_{287},s_{288}$ which are set to 1. The initialisation stage requires $4*288=1152$ steps and is similar to the keystream generation, except that there are no output bits.
+The key is loaded into the first eighty bits of the first register, whilst the IV is loaded into the first eighty bits of the second register. All remaining bits are set to zero, with the exception of bits $s_{286},s_{287},s_{288}$ which are set to 1. The initialisation stage requires $4*288=1152$ steps and is similar to the keystream generation, except that there are no output bits [See Algorithm \ref{alg:orig-iv}].
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -237,7 +237,7 @@ The key is loaded into the first eighty bits of the first register, whilst the I
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$
 \EndFor
 \end{algorithmic}
-\caption{Original Key and IV Setup}
+\caption{Original Key and IV Setup}\label{alg:orig-iv}
 \end{algorithm}
 
 \begin{figure}[H]
@@ -251,13 +251,14 @@ The key is loaded into the first eighty bits of the first register, whilst the I
 
 \subsection{Attack Scenario and Assumptions}
 
-We assume that we have physical access to the device running Trivium. Given today's global supply chain, packages can easily be intercepted and tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications to the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run singed code, since this would be too much overhead fur such use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore, since keys are reused for stream ciphers but IVs are publicly known, once the key has been retrieved all future communications can be compromised. 
+We assume that we have physical access to the device running Trivium. Given today's global supply chain, packages can easily be intercepted and tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications to the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run singed code, since this would be too much overhead fur such use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore,
+in the case of the Trivium stream cipher keys are reused and IVs are publicly known. Therefore, once the key has been retrieved all future communications can be compromised. 
 
 The attack would be carried out in the following steps. Initially the binary would be extracted from the micro-controller and replaced with the fault injected binary. The fault injected Trivium would then be run to obtain $\alpha$ output bits. The output stream would then be cryptanalysed as described in Section \ref{sec:cryptanalysis} in order to recover the key. Finally, the original binary would be loaded back onto the device. Since the IV is publicly known and the key is reused, all communications using that device can be deciphered.
 
 \subsection{Stuck-at Fault}
 
-As previously mentioned, Trivium benefits from a non-linear feedback function. In order to reduce this to a linear feedback function, we want to effectively remove the AND gates. This can be done by injecting a stuck-at-0 fault. Furthermore, the following XOR gate can effectively be ignored, since $A\oplus0=A$. The injection of such a fault can be done in numerous ways, such as modifying the binary code executed by the micro-controller. In the case of a hardware implementation, the FPGA bitsream could be modified whilst loading a design onto the chip. Other alternatives include EM fault injections or optical fault injections.
+As previously mentioned, Trivium benefits from a non-linear feedback function. In order to reduce this to a linear feedback function, we want to effectively remove the AND gates. This can be done by injecting a stuck-at-0 fault. Furthermore, the following XOR gate can effectively be ignored, since $A\oplus0=A$. The injection of such a fault can be done in numerous ways, such as modifying the binary code executed by the micro-controller. In the case of a hardware implementation, the FPGA bitsream could be modified whilst loading a design onto the chip. Other alternatives include EM fault injections or optical fault injections \cite{optical}.
 
 \section{Code Analysis}\label{sec:code}
 
@@ -282,12 +283,12 @@ We start by analysing the official C code authored by Christophe De Canni\`ere w
 \end{figure}
 
 The key generation function is a linear combination of the bits $t_1, t_2$ and $t_3$.
-The three original feedback functions are of the following form: $$t_i \gets t_i \oplus ((s_I \odot s_{II}) \oplus s_{III})$$ However, we wish to reduce the non-linear feedback function to a linear one. This can be done by introducing a stuck-at-o fault in the following way:
+The three original feedback functions are of the following form: $$t_i \gets t_i \oplus ((s_I \odot s_{II}) \oplus s_{III})$$ However, we wish to reduce the non-linear feedback function to a linear one. This can be done by introducing a stuck-at-0 fault in the following way:
 \begin{align*}
 t_i &\gets t_i \oplus ((0) \oplus s_{III})\\
 t_i &\gets t_i \oplus (s_{III})
 \end{align*}
-Performing the modification in the C code [See Figure \ref{modified-macro}] will change multiple assembly instructions and the code will not be of the same length as the original. It is unlikely that arbitrary code modifications will be accepted by a micro-controller. Therefore we aim to make minimal adjustments to the binary code.
+Performing the modification in the C code [See Figure \ref{modified-macro}] will change multiple assembly instructions and the code will not be of the same length as the original. It is unlikely that arbitrary code modifications will be accepted by a micro-controller. Therefore, we aim to make minimal adjustments to the binary code.
 \begin{figure}[H]
 \begin{lstlisting}[style=snippet, frame=tlrb]
 #define UPDATE()
@@ -366,7 +367,7 @@ After injecting the faults as described above, both the keystream generation alg
 
 \subsection{Keystream Generation}
 
-After the modifications the keystream remains a linear combination of the three registers, $t_1 \oplus t_2 \oplus t_3 = z_i$. However, at each clock cycle, three bits are updated using a linear feedback function, whist one output bit $z_i$ is obtained [See Figure \ref{fig:modified}].
+After the injecting the faults the keystream remains a linear combination of the three registers, $t_1 \oplus t_2 \oplus t_3 = z_i$. However, at each clock cycle, three bits are updated using a, now, linear feedback function, whist one output bit $z_i$ is obtained [See Algorithm \ref{alg:mod-key} and Figure \ref{fig:modified}].
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -386,12 +387,12 @@ After the modifications the keystream remains a linear combination of the three 
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$
 \EndFor
 \end{algorithmic}
-\caption{Modified Keystream Generation}
+\caption{Modified Keystream Generation} \label{alg:mod-key}
 \end{algorithm}
 
 \subsection{Key and IV Setup}
 
-The key and IV setup proceeds as before, requiring $4*288=1152$ steps and giving no output bits.
+The key and IV setup proceeds as before, requiring $4*288=1152$ steps and giving no output bits [See Algorithm \label{alg:mod-iv}].
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -409,7 +410,7 @@ The key and IV setup proceeds as before, requiring $4*288=1152$ steps and giving
 \State $(s_{178},s_{179},\dots,s_{288}) \gets (t_2,s_{178},\dots,s_{287})$
 \EndFor
 \end{algorithmic}
-\caption{Modified Key and IV Setup}
+\caption{Modified Key and IV Setup} \label{alg:mod-iv}
 \end{algorithm}
 
 \begin{figure}[H]
