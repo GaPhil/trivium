@@ -392,7 +392,7 @@ After the injecting the faults the keystream remains a linear combination of the
 
 \subsection{Key and IV Setup}
 
-The key and IV setup proceeds as before, requiring $4*288=1152$ steps and giving no output bits [See Algorithm \label{alg:mod-iv}].
+The key and IV setup proceeds as before, requiring $4*288=1152$ steps and giving no output bits [See Algorithm \ref{alg:mod-iv}].
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -458,9 +458,8 @@ $}
 
 \subsection{Key from Initial State}
 
-The initial state is then expressed as a system of 288 linear equations, made up from 80 unknown bits from the key, 80 known bits from the IV, 125 bits set to 0, and three bits set to 1. A linear system with $k$ unknown variables can be solved using Gaussian elimination in time $k^\alpha$, where $\alpha\leq 2.376$ \cite{gauss}. Finding the solution takes at most $\mathcal{O}(80^{2.376})$ operations.
+The initial state is then expressed as a system of 288 linear equations, made up from 80 unknown bits from the key, 80 known bits from the IV, 125 bits set to 0, and three bits set to 1. A linear system with $k$ unknown variables can be solved using Gaussian elimination in time $k^\alpha$, where $\alpha\leq 2.376$ \cite{gauss}. Thus, finding the solution takes at most $\mathcal{O}(80^{2.376})$ operations.
  
-
 \section{Summary}
 
 We presented a non-invasive attack on the Trivium stream cipher. The attack introduces a stuck-at-0 fault by modifying a minimal number of bits in the binary code. Our attack reduces the non-line feedback function to a linear one, making retrieval of the internal state and key tractable.
@@ -474,8 +473,3 @@ I would like to thank Elena Dubrova for the idea and her support throughout this
 \nocite{*}
 
 \end{document}
-
-
-% \subsection{bull shit}
-
-% We run the fault injected code using the following key \code{0x0F62B5085BAE0154A7FA} and IV \code{0x288FF65DC42B92F960C7}.
