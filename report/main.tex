@@ -20,6 +20,10 @@
 \renewcommand\algorithmicthen{}
 \setlength{\parindent}{0em}
 
+\usepackage{setspace}
+\renewcommand{\baselinestretch}{1.15} 
+
+
 \pagestyle{fancy}
 \fancyhead{}
 
@@ -93,7 +97,7 @@ columns=fullflexible,
 }
 
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
-\usepackage{cite}
+% \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{graphicx}
 \usepackage{textcomp}
@@ -108,18 +112,18 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \textit{Theoretical Computer Science} \\
 Stockholm, Sweden \\
 gajland@kth.se}
-\and
-\IEEEauthorblockN{Daniel Skantz}
-\IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-\textit{Theoretical Computer Science} \\
-Stockholm, Sweden \\
-danska@kth.se}
-\and
-\IEEEauthorblockN{Elena Dubrova}
-\IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
-\textit{Electronic Systems Design} \\
-Stockholm, Sweden \\
-dubrova@kth.se}
+% \and
+% \IEEEauthorblockN{Daniel Skantz}
+% \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
+% \textit{Theoretical Computer Science} \\
+% Stockholm, Sweden \\
+% danska@kth.se}
+% \and
+% \IEEEauthorblockN{Elena Dubrova}
+% \IEEEauthorblockA{\textit{KTH Royal Institute of Technology} \\
+% \textit{Electronic Systems Design} \\
+% Stockholm, Sweden \\
+% dubrova@kth.se}
 }
 
 \maketitle
@@ -137,51 +141,9 @@ trivium, stream cipher, fault attack
 \end{IEEEkeywords}
 
 \section{Introduction}
+As the Internet of Things (IoT) continues to gain traction, so does the need for secure IoT devices. Although 23.3 billion IoT devices are estimated to be connected by 2023 \cite{iot}, vendors often neglect the security of such devices. Thus, significantly increasing the attack surface for adversaries to mount attacks on larger systems. This was demonstrated in the 2016 Dyn cyberattack, when IoT devices where used as a botnet to perform a distributed denial of service attack \cite{dyn}. A primary concern is securing systems, and stream ciphers can offer an attractive solution for secure communications, when low power consumption is essential.
 
-As the Internet of Things (IoT) continues to gain traction, so does the need for secure IoT devices. Although 23.3 billion IoT devices are estimated to be connected by 2023 \cite{iot}, vendors often neglect the security of such devices. Stream ciphers can offer an attractive solution for secure communications, when low power consumption is essential.
-
-
-
-
-In this paper we analyse the design choices made by the authors of Trivium, in order to discover a new class of vulnerabilities. 
-
-
-We go on to demonstrate a fault attack on the software implementation of Trivium.
-
-
-
-The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. In this paper we analyse the design choices made by the authors of Trivium. We go on to demonstrate a fault attack on the software implementation of Trivium. 
-
-The attack works by modifying compiled binaries at targeted positions to introduce stuck at 0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher and in turn extraction of the 80-bit key becomes tractable.
-
-
-trade off between performance and security, when low power consumption is of high significance. 
-
-
-Stream ciphers can offer an attractive trade off between security and per in situations where power consutmption 
-, due to their low
-
-
-When performance 
-
-A primary concern is securing systems 
-
-an attractive solution when low powerconsumption is vital 
-Thus, significantly increasing the attack surface for adversaries to mount attacks on larger systems, as was demonstrated in the 2016 Dyn cyberattack.
-
-
-Stream Ciphers offer an attractive trade-off between lightweight crypto primitives and security in 
-
-
-\begin{itemize}
-\item[$\blacktriangleright$] A network is only as secure as its weakest link.
-\item[$\blacktriangleright$] 23.3 billion IoT devices by 2023.
-\item[$\blacktriangleright$] Need for securing IoT devices.
-\begin{itemize}[itemsep=0.25cm]
-\item[$\triangleright$] DDoS attacks e.g. Dyn cyberattack 2016.
-\end{itemize}
-\item[$\blacktriangleright$] Require energy efficient ciphers.
-\end{itemize}
+The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. In this paper we analyse the design choices made by the authors of Trivium, in order to reveal a new class of vulnerabilities in the cipher. We go on to demonstrate a fault attack on the software implementation of Trivium. The attack works by modifying compiled binaries at targeted positions to introduce stuck at 0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher and in turn extraction of the 80-bit key becomes tractable.
 
 \section{Background}
 
@@ -199,15 +161,32 @@ SOSEMANUK & \\\hline
 \label{tab:portfolio}
 \end{table}
 
-\section{Previous attacks on Trivium}
+\section{Previous Work}
 
-In this section we aim to give a brief outline of some of the attacks aimed at Trivium 
+In this section we aim to give an outline of some of the attacks aimed at Trivium. 
+P. Hawkes and G. Rose showed guess-and-determine (GD) attacks on the SNOW stream cipher. A GD attack \textit{guesses} some internal values and then exploits the relationships to \textit{determine} other internal values; hence the name. However, this kind of attack is most suitable for word-oriented stream ciphers. The first attack has a data complexity of $\mathcal{O}(2^{64})$ and a process complexity of $\mathcal{O}(2^{256})$. The second attack has a process complexity of $\mathcal{O}(2^{224})$, and a data complexity of $\mathcal{O}(2^{95})$.\cite{Hawkes2003}
 
-TODO//TODO//TODO//
+In 2010 N. Rohani et al. showed a GD attack method on Trivium and Bivium. \cite{Rohani2010} Due to the large length of the internal state, the attack was not successful on Trivium. The complexity is of order $\mathcal{O}(2^{90.67})$. However, for Bivium only $27.55$ bits need to be guessed in order to determine the remaining bits. A total of $2^{43.99}$ keystream bits are needed for the attack. The complexity of the attack on Bivium is $\mathcal{O}(2^{27.55})$, which is an improvement to the previous GD attack demonstrated by McDonald, Charnes, Pieprzyk \cite{biv-old}, with a complexity of $\mathcal{O}(2^{52.3})$.
 
+M. Hojsík and B. Rudolf \cite{Hojsik2008} showed a Differential Fault Analysis of Trivium for which an attacker needs approximately 12 fault injections to obtain the secret key and IV. In their attack, the fault is injected into the inner state of the cipher. 
+The attack essentially boils down to solving a system of equations in the inner state bits $IS_t = (s_1,\dots, s_{288})$
+Their attack algorithm can be described as follows \cite{Hojsik2008}:
+\begin{algorithmic}[1]
+\State obtain the proper keystream generated from $IS_t$ 
+\State insert the keystream equations into the system 
+\While{solution not found}
+\State reset the cipher to the state $IS_t$
+\State insert a fault into $IS_t$ at random position
+\State obtain the faulty keystream
+\State determine the fault position
+\State insert delta keystream equations into the system
+\State try to solve the system
+\EndWhile
+\State clock Trivium backwards until initial state reached
+\State read the secret key and IV
+\end{algorithmic}
 
-
-
+In 2012 Y. Hu et al. presented a fault analysis of Trivium \cite{Hu2012}. By observing an average of $195 \times 17$ key-stream bits, the attacker can break Trivium with a repeated number of injections. 
 
 \section{Trivium Design Specification}
 
@@ -273,14 +252,13 @@ The key is loaded into the first eighty bits of the first register, whilst the I
 \label{fig:original}
 \end{figure}
 
-
 \section{Fault Injection}
 
 \subsection{Attack Scenario and Assumptions}
 
-We assume that we have physical access to the device running Trivium. This is a reasonable assumptions, since packages can easily be tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications on the existing code. Lightweight IoT devices do not usually run singed code, since this would be too bulky in these kinds of situations. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore, since keys are reused for stream ciphers but IVs are publicly known, once the key has been retrieved all future communications can be compromised. 
+We assume that we have physical access to the device running Trivium. Given today's global supply chain, this is a reasonable assumptions. Packages can easily be intercepted and tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications on the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run singed code, since this would be too bulky in these use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore, since keys are reused for stream ciphers but IVs are publicly known, once the key has been retrieved all future communications can be compromised. 
 
-The attack would be carried out in the following steps. Initially the binary would be extracted from the micro-controller and replace with eh fault injected binary. The fault injected Trivium would then be run to obtain $\alpha$ output bits. The output stream would then be cryptanalysed as described in Section \ref{sec:cryptanalysis} in order to recover the key. Finally the original binary would be loaded back onto the device. Since the IV is publicly known and the key is reused, all future communications can be deciphered.
+The attack would be carried out in the following steps. Initially the binary would be extracted from the micro-controller and replace with the fault injected binary. The fault injected Trivium would then be run to obtain $\alpha$ output bits. The output stream would then be cryptanalysed as described in Section \ref{sec:cryptanalysis} in order to recover the key. Finally, the original binary would be loaded back onto the device. Since the IV is publicly known and the key is reused, all future communications can be deciphered.
 
 \subsection{Stuck-at Fault}
 
@@ -354,7 +332,7 @@ and    %eax,%r15d   41 21 c7
 \caption{Original Assembly Code}\label{fig:orgi-asm}
 \end{figure}
 
-If we inject the fault using \code{xor} instructions instead of \code{and} instructions, we will be short of 3 bytes, since we do not require the least significant bits from the \code{\%r15d} and \code{\%r9d} register. When linking a modified object file in which the length has not been preserved, linking fails. \code{ld: malformed nlist string offset file 'trivium.o'\\clang: error: linker command failed with exit code 1 (use -v to see invocation)}. In order to combat this we add 3 \code{nop} instructions that preserve the total byte length of the object code [See Figure \ref{fig:mod-asm}].
+If we inject the fault using \code{xor} instructions instead of \code{and} instructions, we will be short of 3 bytes, since we do not require the least significant bits from the \code{\%r15d} and \code{\%r9d} register. When linking a modified object file in which the length has not been preserved, linking fails with: \code{ld: malformed nlist string offset file 'trivium.o'\\clang: error: linker command failed with exit code 1 (use -v to see invocation)}. In order to combat this we add 3 \code{nop} instructions that preserve the total byte length of the object code [See Figure \ref{fig:mod-asm}].
 
 \begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
@@ -378,7 +356,7 @@ nop                 90
 \caption{Modified Assembly Code}\label{fig:mod-asm}
 \end{figure}
 
-
+TODO//TODO//TODO
 
 \begin{figure}[H]
 \begin{lstlisting}[style=hex, frame=tlrb]
