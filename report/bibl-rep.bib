@@ -79,12 +79,6 @@ url = {http://link.springer.com/10.1007/s10623-011-9518-9},
 volume = {62},
 year = {2012}
 }
-@misc{,
-annote = {More info on trivium!
-Written by the authors of Trivium.
-},
-title = {article-850}
-}
 @article{Dubrova,
 annote = {Elena's paper - describes Fault Injection attack.},
 author = {Dubrova, Elena},
@@ -109,38 +103,35 @@ pages = {1--15},
 title = {{On the Design and Analysis of Stream Ciphers}},
 year = {2007}
 }
-@article{Ahmadi,
-annote = {This paper describes a guess and determine attack with a guess based on assuming a specific value in one term of the recurrence relation expression.},
-author = {Ahmadi, Hadi and Eghlidos, Taraneh and Khazaei, Shahram},
-number = {Iv},
-pages = {2--9},
-title = {{Improved Guess and Determine Attack on}}
+@inproceedings{Hawkes2003,
+  author    = {Philip Hawkes and
+               Gregory G. Rose},
+  title     = {Guess-and-Determine Attacks on {SNOW}},
+  booktitle = {Selected Areas in Cryptography, 9th Annual International Workshop,
+               {SAC} 2002, St. John's, Newfoundland, Canada, August 15-16, 2002.
+               Revised Papers},
+  pages     = {37--46},
+  year      = {2002},
+  url       = {https://doi.org/10.1007/3-540-36492-7\_4},
+  doi       = {10.1007/3-540-36492-7\_4},
+  timestamp = {Tue, 14 May 2019 10:00:38 +0200},
+  biburl    = {https://dblp.org/rec/bib/conf/sacrypt/HawkesR02},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
-@article{Hawkes2003,
-abstract = {This paper describes guess and determine attacks on the stream cipher SNOW. The first attack has a data complexity of O(2{\^{}}64) and a process complexity of O(2{\^{}}224) and data complexity of O(2{\^{}}95)},
-annote = {GD attack on SNOW.
-Recommended by Martin Hell.},
-author = {Hawkes, Philip and Rose, Gregory G.},
-issn = {03029743},
-journal = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
-pages = {37--46},
-title = {{Guess-and-determine attacks on SNOW}},
-volume = {2595},
-year = {2003}
-}
-@article{Hojsik2008,
-abstract = {Trivium is a hardware-oriented stream cipher designed in 2005 by de Canniere and Preneel for the European project eStream, and it has successfully passed the first and the second phase of this project. Its design has a simple and elegant structure. Although Trivium has attached a lot of interest, it remains unbroken. In this paper we present differential fault analysis of Trivium and propose two attacks on Trivium using fault injection. We suppose that an attacker can corrupt exactly one random bit of the inner state and that he can do this many times for the same inner state. This can be achieved e.g. in the CCA scenario. During experimental simulations, having inserted 43 faults at random positions, we were able to disclose the trivium inner state and afterwards the private key. As far as we know, this is the first time differential fault analysis is applied to a stream cipher based on shift register with non-linear feedback.},
-annote = {This has a nice diagram},
-author = {Hojs{\'{i}}k, Michal and Rudolf, Bohuslav},
-doi = {10.1007/978-3-540-71039-4_10},
-isbn = {3540710388},
-issn = {03029743},
-journal = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
-keywords = {Differential fault analysis,Fault injection,Trivium stream cipher},
-pages = {158--172},
-title = {{Differential fault analysis of Trivium}},
-volume = {5086 LNCS},
-year = {2008}
+@InProceedings{Hojsik2008,
+author="Hojs{\'i}k, Michal
+and Rudolf, Bohuslav",
+editor="Chowdhury, Dipanwita Roy
+and Rijmen, Vincent
+and Das, Abhijit",
+title="Floating Fault Analysis of Trivium",
+booktitle="Progress in Cryptology - INDOCRYPT 2008",
+year="2008",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="239--250",
+abstract="One of the eSTREAM final portfolio ciphers is the hardware-oriented stream cipher Trivium. It is based on 3 nonlinear feedback shift registers with a linear output function. Although Trivium has attached a lot of interest, it remains unbroken by passive attacks.",
+isbn="978-3-540-89754-5"
 }
 @article{Swierczynski2015,
 abstract = {This paper investigates a novel attack vector against cryptography realized on FPGAs, which poses a serious threat to real-world applications. We demonstrate how a targeted bitstream modification can seriously weaken cryptographic algorithms, which we show with the examples of AES and 3-DES. The attack is performed by modifying the FPGA bitstream that configures the hardware elements during initialization. Recently, it has been shown that cloning of FPGA designs is feasible, even if the bitstream is encrypted. However, due to its proprietary file format, a meaningful modification is challenging. While some previous work addressed bitstream reverse-engineering, so far it has not been evaluated how difficult it is to detect and modify cryptographic elements. We outline two possible practical attacks that have serious security implications. We target the S-boxes of block ciphers that can be implemented in look-up tables or stored as precomputed set of values in the memory of the FPGA. We demonstrate that it is possible to detect and apply meaningful changes to cryptographic elements inside an unknown, proprietary, and undocumented bitstream. Our proposed attack does not require any knowledge of the internal routing. Furthermore, we show how an AES key can be revealed within seconds. Finally, we discuss countermeasures that can raise the bar for an adversary to successfully perform this kind of attack.},
@@ -179,14 +170,39 @@ pages="63--76",
 abstract="In this paper we present experimental results of an application of SAT solvers in current cryptography. Trivium is a very promising stream cipher candidate in the final phase of the eSTREAM project. We use the fastest industrial SAT solvers to attack a reduced version of Trivium -- called Bivium. Our experimental attack time using the SAT solver is the best attack time that we are aware of, it is faster than the following attacks: exhaustive search, a BDD based attack, a graph theoretic approach and an attack based on Gr{\"o}bner bases. The attack recovers the internal state of the cipher by first setting up an equation system describing the internal state, then transforming it into CNF and then solving it. When one implements this attack, several questions have to be answered and several parameters have to be optimised.",
 isbn="978-3-540-79719-7"
 }
-
-@inproceedings{optical,
-author = {Skorobogatov, Sergei and Anderson, Ross},
-year = {2002},
-month = {08},
-pages = {2-12},
-title = {Optical Fault Induction Attacks},
-volume = {2523},
-journal = {Optical Fault Induction Attacks},
-doi = {10.1007/3-540-36400-5_2}
+@InProceedings{optical,
+author="Skorobogatov, Sergei P.
+and Anderson, Ross J.",
+editor="Kaliski, Burton S.
+and Ko{\c{c}}, {\c{c}}etin K.
+and Paar, Christof",
+title="Optical Fault Induction Attacks",
+booktitle="Cryptographic Hardware and Embedded Systems - CHES 2002",
+year="2003",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="2--12",
+abstract="We describe a new class of attacks on secure microcontrollers and smartcards. Illumination of a target transistor causes it to conduct, thereby inducing a transient fault. Such attacks are practical; they do not even require expensive laser equipment. We have carried them out using a flashgun bought second-hand from a camera store for {\$}30 and with an {\$}8 laser pointer. As an illustration of the power of this attack, we developed techniques to set or reset any individual bit of SRAM in a microcontroller. Unless suitable countermeasures are taken, optical probing may also be used to induce errors in cryptographic computations or protocols, and to disrupt the processor's control flow. It thus provides a powerful extension of existing glitching and fault analysis techniques. This vulnerability may pose a big problem for the industry, similar to those resulting from probing attacks in the mid-1990s and power analysis attacks in the late 1990s.",
+isbn="978-3-540-36400-9"
+}
+@ARTICLE{history,
+author={J. V. {Carreira} and D. {Costa} and J. G. {Silva}},
+journal={IEEE Spectrum},
+title={Fault injection spot-checks computer system dependability},
+year={1999},
+volume={36},
+number={8},
+pages={50-55},
+keywords={computer testing;performance evaluation;fault tolerant computing;computer system dependability;performance testing;fault injection;fault tolerance;Swift tools;software bugs;fault handling mechanisms;dependability benchmarks;Hardware;Fault tolerant systems;System testing;Medical control systems;Telecommunication control;Timing;Linear discriminant analysis;Computational modeling;Predictive models;Computer simulation},
+doi={10.1109/6.780999},
+ISSN={1939-9340},
+month={Aug}
+}
+@book{des,
+author = {Biham, Eli and Shamir, Adi},
+title = {Differential Cryptanalysis of the Data Encryption Standard},
+year = {1993},
+isbn = {0387979301},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg}
 }

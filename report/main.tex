@@ -124,7 +124,7 @@ gajland@kth.se}
 \begin{abstract}
 As the Internet of Things (IoT) continues to gain traction, so does the need for secure IoT devices. Although 23.3 billion IoT devices are estimated to be connected by 2023 \cite{iot}, vendors often neglect the security of such devices. Stream ciphers can offer an attractive solution for secure communications, when low power consumption is essential. 
 
-The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2018, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. 
+The eSTREAM project was intended to \textit{"identify new stream ciphers suitable for widespread adoption"}.\cite{call} In 2008, Trivium, a synchronous stream cipher was selected as part of the portfolio for low area hardware ciphers. 
 
 In this paper we study the design choices made by the authors of Trivium in order to demonstrate a fault attack on the software implementation of the cipher. Whilst Trivium maintains most desirable cryptographic properties, a simple design was chosen by the authors to provide flexibility. Our non-invasive attack works by modifying the compiled binary at targeted positions to introduce stuck-at-0 faults. Using this technique, we are able to reduce the non-linear feedback function to a linear one. Thus, it is possible to recover the 288-bit internal state of the cipher. In turn, extraction of the 80-bit key becomes tractable.
 \end{abstract}
@@ -142,6 +142,11 @@ The remainder of the paper is structured as follows. We start by giving a brief 
 
 \section{Background}\label{sec:background}
 
+Already during World War II, the breaking of ciphers was of significant interest to the allied forces trying to intercept German communications. The work of Alan Turing amongst others at Bletchley Park, that led to breaking the Enigma Machine, has often been cited as an instrumental turning point which may have had a profound impact on the outcome of the war.
+Although it was already known to the NSA at the time, another notable milestone in cryptography includes the discovery of Differential cryptanalysis on DES by Biham and Shamir \cite{des}. Over the years numerous creative attacks on ciphers have been proposed and techniques of fault injections date back to the 1970s \cite{history}. Whilst fault injections originated from hardware systems, today fault injections have become an attractive way to test both software and hardware systems under stress.
+
+Stream ciphers are symmetric ciphers that make use of a pseudo random number generator, whose output is used as a keystream. For encryption, the keystream is XORed with the plaintext in order to obtain the cipher text. Decryption is done similarly; the ciphertext is XORed with the keystream in order to obtain the plaintext.
+
 As a result of the failures of all six stream ciphers submitted to the NESSIE (New European Schemes for Signatures, Integrity and Encryption) project, the eSTREAM project was launched in 2004 in order to \textit{"identify new stream ciphers suitable for widespread adoption"} \cite{call}. Four years later, a portfolio of new stream ciphers was announced in April 2008. The portfolio was revised in September 2008, and currently consist of seven stream ciphers [See Table \ref{tab:portfolio}], divided into two profiles, hardware and software. The book entitled \textit{New Stream Cipher Designs - The eSTREAM Finalists} \cite{book} was published by Springer in 2008 and provides full specifications of all 16 ciphers that reached the final phase of the eSTREAM project.
 \begin{table}[H]
 \centering
@@ -158,10 +163,11 @@ SOSEMANUK & \\\hline
 
 \section{Previous Work}\label{sec:previous-work}
 
-In this section we aim to give an outline of some of the attacks aimed at Trivium. 
-P. Hawkes and G. Rose showed guess-and-determine (GD) attacks on the SNOW stream cipher. A GD attack \textit{guesses} some internal values and then exploits the relationships to \textit{determine} other internal values; hence the name. However, this kind of attack is most suitable for word-oriented stream ciphers. The first attack has a data complexity of $\mathcal{O}(2^{64})$ and a process complexity of $\mathcal{O}(2^{256})$. The second attack has a process complexity of $\mathcal{O}(2^{224})$, and a data complexity of $\mathcal{O}(2^{95})$.\cite{Hawkes2003}
+In this section we give an outline of some of the attacks aimed at Trivium. 
+P. Hawkes and G. Rose showed guess-and-determine (GD) attacks on the SNOW stream cipher. A GD attack \textit{guesses} some internal values and then exploits the relationships to \textit{determine} other internal values; hence the name. However, this kind of attack is most suitable for word-oriented stream ciphers. The first attack has a data complexity of $2^{64}$ and a process complexity of $2^{256}$. That is, $2^{64}$ keystream bits are needed, whilst $2^{256}$ is the time complexity of processing the keystream in order to perform the attack. The second attack has a process complexity of $2^{224}$, and a data complexity of $2^{95}$.\cite{Hawkes2003}
 
-In 2010 N. Rohani et al. showed a GD attack method on Trivium and Bivium. \cite{Rohani2010} Due to the large length of the internal state, the attack was not successful on Trivium. The complexity is of order $\mathcal{O}(2^{90.67})$. However, for Bivium only $27.55$ bits need to be guessed in order to determine the remaining bits. A total of $2^{43.99}$ keystream bits are needed for the attack. The complexity of the attack on Bivium is $\mathcal{O}(2^{27.55})$, which is an improvement to the previous GD attack demonstrated by McDonald, Charnes, Pieprzyk \cite{biv-old}, with a complexity of $\mathcal{O}(2^{52.3})$.
+In 2010 N. Rohani et al. showed a GD attack method on Trivium and Bivium \cite{Rohani2010} (Bivium is simply the truncated version of Trivium using two linear shift registers as opposed to three).
+Due to the large length of the internal state, the attack was not successful on Trivium. The complexity is of order $2^{90.67}$. However, for Bivium only $27.55$ bits need to be guessed in order to determine the remaining bits. A total of $2^{43.99}$ keystream bits are needed for the attack. The complexity of the attack on Bivium is $2^{27.55}$, which is an improvement to the previous GD attack demonstrated by McDonald, Charnes, Pieprzyk \cite{biv-old}, with a complexity of $2^{52.3}$.
 
 M. Hojsík and B. Rudolf \cite{Hojsik2008} showed a Differential Fault Analysis of Trivium for which an attacker needs approximately 12 fault injections to obtain the secret key and IV. In their attack, the fault is injected into the inner state of the cipher. 
 The attack essentially boils down to solving a system of equations in the inner state bits $IS_t = (s_1,\dots, s_{288})$
@@ -219,7 +225,7 @@ The keystream is generated as a linear combination of the three registers, $t_1\
 \end{algorithm}
 
 \subsection{Key and IV Setup}\label{sec:key-iv-o}
-The key is loaded into the first eighty bits of the first register, whilst the IV is loaded into the first eighty bits of the second register. All remaining bits are set to zero, with the exception of bits $s_{286},s_{287},s_{288}$ which are set to 1. The initialisation stage requires $4*288=1152$ steps and is similar to the keystream generation, except that there are no output bits [See Algorithm \ref{alg:orig-iv}].
+The key is loaded into the first eighty bits of the first register, whilst the IV is loaded into the first eighty bits of the second register. All remaining bits are set to zero, with the exception of bits $s_{286},s_{287},s_{288}$ which are set to 1. The initialisation stage requires $4*288=1152$ steps and is identical to the keystream generation, except that there are no output bits [See Algorithm \ref{alg:orig-iv}].
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -249,9 +255,9 @@ The key is loaded into the first eighty bits of the first register, whilst the I
 
 \section{Fault Injection}\label{sec:fault-inj}
 
-\subsection{Attack Scenario and Assumptions}
+\subsection{Attack Scenario and Assumptions}\label{sec:fault}
 
-We assume that we have physical access to the device running Trivium. Given today's global supply chain, packages can easily be intercepted and tampered with during shipment. We wish to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, we wish to perform a minimal number of modifications to the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run singed code, since this would be too much overhead fur such use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore,
+We assume that the attacker has physical access to the device running Trivium. Given today's global supply chain, packages can easily be intercepted and tampered with during shipment. The attacker wishes to perform a non-invasive attack that leaves little traces of whether or not the micro-controller has been tampered with. Whilst the attack works similarly in hardware, for it to remain undetected we focus on the software implementation. There may be some proprietary protection mechanism, preventing arbitrary code from being run on the micro-controller. Hence, the attacker wishes to perform a minimal number of modifications to the existing code. The attacker is able to inject faults into the binary at targeted positions using a hex-editor. Lightweight IoT devices do not usually run signed code, since this would be too much overhead fur such use-cases. Furthermore, we assume that the lock bits needed to protect against read-back are not set. In order to motivate this attack we presume that the key is securely stored and cannot be obtained with ease. Furthermore,
 in the case of the Trivium stream cipher keys are reused and IVs are publicly known. Therefore, once the key has been retrieved all future communications can be compromised. 
 
 The attack would be carried out in the following steps. Initially the binary would be extracted from the micro-controller and replaced with the fault injected binary. The fault injected Trivium would then be run to obtain $\alpha$ output bits. The output stream would then be cryptanalysed as described in Section \ref{sec:cryptanalysis} in order to recover the key. Finally, the original binary would be loaded back onto the device. Since the IV is publicly known and the key is reused, all communications using that device can be deciphered.
@@ -284,10 +290,10 @@ We start by analysing the official C code authored by Christophe De Canni\`ere w
 
 The key generation function is a linear combination of the bits $t_1, t_2$ and $t_3$.
 The three original feedback functions are of the following form: $$t_i \gets t_i \oplus ((s_I \odot s_{II}) \oplus s_{III})$$ However, we wish to reduce the non-linear feedback function to a linear one. This can be done by introducing a stuck-at-0 fault in the following way:
-\begin{align*}
+\begin{align}\label{fault}
 t_i &\gets t_i \oplus ((0) \oplus s_{III})\\
 t_i &\gets t_i \oplus (s_{III})
-\end{align*}
+\end{align}
 Performing the modification in the C code [See Figure \ref{modified-macro}] will change multiple assembly instructions and the code will not be of the same length as the original. It is unlikely that arbitrary code modifications will be accepted by a micro-controller. Therefore, we aim to make minimal adjustments to the binary code.
 \begin{figure}[H]
 \begin{lstlisting}[style=snippet, frame=tlrb]
@@ -307,7 +313,8 @@ Performing the modification in the C code [See Figure \ref{modified-macro}] will
 
 \subsection{Assembly Code}
 The original binary code can be disassembled in order to pinpoint the location of the \code{and} instructions [See Figure \ref{fig:orgi-asm}].
-Essentially three instructions need to be modified as detailed above. However, the code was implemented using macros and these perform replacement of the text. The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. Thus, the three instructions need to be modified in three different places of the binary. As described above, we will introduce the fault using \code{xor \%dst, \%dst}. \code{21} represents the opcode for the \code{xor} instruction in the x86 instruction set. The following byte is needed for specifying the source and destination register. The least significant 32 bits of the used registers are available via a \code{d} suffix, requiring the extra byte \code{41}.
+Essentially three instructions need to be modified as detailed above. However, the code was implemented using macros and these perform replacement of the text. The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. Thus, the three instructions need to be modified in three different places of the binary. 
+We can introduce the fault as detailed in equation (\ref{fault}), using \code{xor \%dst, \%dst}. \code{21} represents the opcode for the \code{xor} instruction in the x86 instruction set. The following byte is needed for specifying the source and destination register. The least significant 32 bits of the used registers are available via a \code{d} suffix, requiring the extra byte \code{41}.
 \begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
 <_ECRYPT_ivsetup>
@@ -354,7 +361,7 @@ nop                 90
 \caption{Modified Assembly Code}\label{fig:mod-asm}
 \end{figure}
 
-It follows that the binary has been modified in a minimal number of places [See Figure \ref{fig:diff}].
+It follows that 18 bytes have been modified in order to perform this attack, corresponding to a mere nine AND instructions [See Figure \ref{fig:diff}].
 
 \begin{figure}[H]
 \centering
@@ -458,11 +465,11 @@ $}
 
 \subsection{Key from Initial State}
 
-The initial state is then expressed as a system of 288 linear equations, made up from 80 unknown bits from the key, 80 known bits from the IV, 125 bits set to 0, and three bits set to 1. A linear system with $k$ unknown variables can be solved using Gaussian elimination in time $k^\alpha$, where $\alpha\leq 2.376$ \cite{gauss}. Thus, finding the solution takes at most $\mathcal{O}(80^{2.376})$ operations.
+The initial state is then expressed as a system of 288 linear equations, made up from 80 unknown bits from the key, 80 known bits from the IV, 125 bits set to 0, and three bits set to 1. A linear system with $k$ unknown variables can be solved using Gaussian elimination in time $\mathcal{O}(k^3)$. Thus, finding the solution takes at most $80^{3}$ operations. We note that there is no need to use asymptotically faster algorithms such as those described in \cite{gauss}, since we are only dealing with 80 variables and such methods would in fact be slower for systems of this size.
  
 \section{Summary}
 
-We presented a non-invasive attack on the Trivium stream cipher. The attack introduces a stuck-at-0 fault by modifying a minimal number of bits in the binary code. Our attack reduces the non-line feedback function to a linear one, making retrieval of the internal state and key tractable.
+We presented a non-invasive attack on the Trivium stream cipher. The attack introduces stuck-at-0 faults at the outputs of AND gates by modifying a minimal number of bits in the binary code. Our attack reduces the non-linear feedback function to a linear one, making retrieval of the internal state and key tractable.
 
 \section*{Acknowledgement}
 
