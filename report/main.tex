@@ -167,7 +167,7 @@ In this section we give an outline of some of the attacks aimed at Trivium.
 P. Hawkes and G. Rose showed guess-and-determine (GD) attacks on the SNOW stream cipher. A GD attack \textit{guesses} some internal values and then exploits the relationships to \textit{determine} other internal values; hence the name. However, this kind of attack is most suitable for word-oriented stream ciphers. The first attack has a data complexity of $2^{64}$ and a process complexity of $2^{256}$. That is, $2^{64}$ keystream bits are needed, whilst $2^{256}$ is the time complexity of processing the keystream in order to perform the attack. The second attack has a process complexity of $2^{224}$, and a data complexity of $2^{95}$.\cite{Hawkes2003}
 
 In 2010 N. Rohani et al. showed a GD attack method on Trivium and Bivium \cite{Rohani2010} (Bivium is simply the truncated version of Trivium using two linear shift registers as opposed to three).
-Due to the large length of the internal state, the attack was not successful on Trivium. The complexity is of order $2^{90.67}$. However, for Bivium only $27.55$ bits need to be guessed in order to determine the remaining bits. A total of $2^{43.99}$ keystream bits are needed for the attack. The complexity of the attack on Bivium is $2^{27.55}$, which is an improvement to the previous GD attack demonstrated by McDonald, Charnes, Pieprzyk \cite{biv-old}, with a complexity of $2^{52.3}$.
+The attack works by guessing some of the internal state variables. Next, the remaining part of the internal state is determined based on the guesses and the outline of the cipher. Finally, assuming that the cipher is loaded with guessed and determined values, an output sequence is obtained from running the algorithm. This output sequence is compared with the actual output sequence. If the two sequences are identical, one can conclude that the guesses were correct. This process is continued with other guessed values until the output sequences match. Due to the large length of the internal state, the attack was not successful on Trivium. The complexity is of order $2^{90.67}$. However, for Bivium only $27.55$ bits need to be guessed in order to determine the remaining bits. A total of $2^{43.99}$ keystream bits are needed for the attack. The complexity of the attack on Bivium is $2^{27.55}$, which is an improvement to the previous GD attack demonstrated by McDonald, Charnes, Pieprzyk \cite{biv-old}, with a complexity of $2^{52.3}$.
 
 M. Hojsík and B. Rudolf \cite{Hojsik2008} showed a Differential Fault Analysis of Trivium for which an attacker needs approximately 12 fault injections to obtain the secret key and IV. In their attack, the fault is injected into the inner state of the cipher. 
 The attack essentially boils down to solving a system of equations in the inner state bits $IS_t = (s_1,\dots, s_{288})$
@@ -187,7 +187,9 @@ Their attack algorithm can be described as follows \cite{Hojsik2008}:
 \State read the secret key and IV
 \end{algorithmic}
 
-In 2012 Y. Hu et al. presented a fault analysis of Trivium \cite{Hu2012}. By observing an average of $195 \times 17$ key-stream bits, the attacker can break Trivium with a repeated number of injections. 
+In 2012 Y. Hu et al. presented a fault analysis of Trivium \cite{Hu2012} with weaker assumptions than those required in \cite{Hojsik2008}. The authors present a novel checking method in which segments of the original keystream and fault injected keystream are compared, in order to determine the injection time and fault position. Their results, which are based on random simulations, show that for various distributions of injection times, Trivium can be broken with few repeated injections. By observing an average of $195 \times 17$ key-stream bits, the aforementioned attack can be done.
+
+The attack presented in this paper is somewhat different to the aforementioned attacks, in that it uses a stuck-at-0 fault injected into the binary of Trivium. In 2019 Dubrova presented a similar attack on ACORN \cite{Dubrova}. The attack injects a single stuck-at-0 fault into the compiled binary of the cipher. With this fault, the key can be recovered from $2^{15.34}$ keystream bits using $2^{35.46}$ operations.
 
 \section{Trivium Design Specification}\label{sec:spec}
 
@@ -311,6 +313,29 @@ Performing the modification in the C code [See Figure \ref{modified-macro}] will
 \label{modified-macro}
 \end{figure}
 
+Another alternative would be to modify the feedback functions as follows.
+\begin{align}
+t_i &\gets t_i \oplus ((s_I \odot (s_I)) \oplus s_{III})\label{form:and}\\
+t_i &\gets t_i \oplus (s_I \oplus s_{III})
+\end{align}
+Whilst the non-linearity of the feedback function is clearly lost, the previously suggested stuck-at-0 fault means that the following XOR term can be cancelled, resulting in one less term during the cryptanalysis.
+
+A stuck at-0-fault could also be achieved by directly adding a constant 0 at the desired position as follows:
+\begin{align*}
+t_i &\gets t_i \oplus ((s_I \odot (0)) \oplus s_{III})\\
+t_i &\gets t_i \oplus (0 \oplus s_{III})\\
+t_i &\gets t_i \oplus s_{III}.
+\end{align*}
+Using a naive approach, this would increase the size of the binary since the constant 0 would require an additional byte. However, a closer look at the assembly code might show that there may well be other methods of achieving the desired injection without increasing the size of the binary. For example the content of a particular register may be zero at the required point in time and could be used instead of the constant 0.
+
+However, we were able to get the desired outcome using the approach described in Equation (\ref{fault}). I.e.
+\begin{align*}
+t_i &\gets t_i \oplus ((s_I \odot s_{II}) \oplus s_{III})\\
+t_i &\gets t_i \oplus ((s_I \oplus s_I) \oplus s_{III})\\
+t_i &\gets t_i \oplus (0) \oplus s_{III})\\
+t_i &\gets t_i \oplus s_{III}.
+\end{align*}
+
 \subsection{Assembly Code}
 The original binary code can be disassembled in order to pinpoint the location of the \code{and} instructions [See Figure \ref{fig:orgi-asm}].
 Essentially three instructions need to be modified as detailed above. However, the code was implemented using macros and these perform replacement of the text. The \code{UPDATE()} macro is used in the \code{ECRYPT\_ivsetup} and \code{ECRYPT\_process\_bytes} functions. Thus, the three instructions need to be modified in three different places of the binary. 
@@ -368,6 +393,30 @@ It follows that 18 bytes have been modified in order to perform this attack, cor
 \fbox{\includegraphics[width=0.45\textwidth]{report/figures/diff.png}}
 \caption{Diff: original binary (green) and modified binary (red).}
 \label{fig:diff}
+\end{figure}
+
+It turns out that the non-linearity of the feedback function can be removed by modifying as few as 7 bytes using the method described in Equation \ref{form:and}. The modification of the binary can be seen in Figure \ref{fig:mod-asm-imp}. The authors note that the cryptanalysis as described in Section \ref{sec:cryptanalysis} follows in a similar fashion but requires a few extra terms in the equation.
+
+\begin{figure}[H]
+\begin{lstlisting}[style=asm, frame=tlrb]
+<_ECRYPT_ivsetup>
+and    %esi,%esi    21 f6
+and    %esi,%esi    21 f6
+and    %eax,%eax    21 c0
+
+<_ECRYPT_process_bytes>
+and    %eax,%eax    21 c0
+and    %ebx,%ebx    21 db 
+and    %eax,%eax    21 c0
+nop                 90
+
+and    %edi,%edi    21 ff
+nop                 90
+and    %ecx,%ecx    21 c9
+and    %eax,%eax    21 c0
+nop                 90
+\end{lstlisting}
+\caption{Modified Assembly Code (improved)}\label{fig:mod-asm-imp}
 \end{figure}
 
 After injecting the faults as described above, both the keystream generation algorithm as well as the key and IV setup are no longer non-linear [See Figure \ref{fig:modified}]. 
@@ -467,9 +516,11 @@ $}
 
 The initial state is then expressed as a system of 288 linear equations, made up from 80 unknown bits from the key, 80 known bits from the IV, 125 bits set to 0, and three bits set to 1. A linear system with $k$ unknown variables can be solved using Gaussian elimination in time $\mathcal{O}(k^3)$. Thus, finding the solution takes at most $80^{3}$ operations. We note that there is no need to use asymptotically faster algorithms such as those described in \cite{gauss}, since we are only dealing with 80 variables and such methods would in fact be slower for systems of this size.
  
-\section{Summary}
+\section{Summary and Future Work}
 
-We presented a non-invasive attack on the Trivium stream cipher. The attack introduces stuck-at-0 faults at the outputs of AND gates by modifying a minimal number of bits in the binary code. Our attack reduces the non-linear feedback function to a linear one, making retrieval of the internal state and key tractable.
+In this paper we presented a non-invasive attack on the Trivium stream cipher. The attack introduces stuck-at-0 faults at the outputs of AND gates by modifying only 18 bytes in the binary code. Our attack reduces the non-linear feedback function to a linear one, making retrieval of the internal state and key tractable.
+
+A way to further develop the attack would be to use a combination of our proposed stuck-at-0 fault injection along with another previously studied attack. One such possibility would be to mount the GD attack by \cite{Rohani2010} as discussed in Section \ref{sec:previous-work} on top of our fault injection. This could potentially further improve the attack, although this remains to be investigated. In this paper, we have focused solely on the software implementation of Trivium. Since Trivium was selected as part of the hardware portfolio of the eSTREAM project, it would make sense to test the attack on a hardware implementation of the cipher. Such an attack would similarly aim to modify the VHDL code in targeted positions, and then load the faulty design onto the FPGA. It is likely that a hardware based attack would have the same outcome as in software.
 
 \section*{Acknowledgement}
 
