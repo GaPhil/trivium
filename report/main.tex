@@ -386,7 +386,7 @@ nop                 90
 \caption{Modified Assembly Code}\label{fig:mod-asm}
 \end{figure}
 
-It follows that 18 bytes have been modified in order to perform this attack, corresponding to a mere nine AND instructions [See Figure \ref{fig:diff}].
+It follows that 21 bytes have been modified in order to perform this attack, corresponding to a mere nine AND instructions [See Figure \ref{fig:diff}].
 
 \begin{figure}[H]
 \centering
@@ -395,7 +395,7 @@ It follows that 18 bytes have been modified in order to perform this attack, cor
 \label{fig:diff}
 \end{figure}
 
-It turns out that the non-linearity of the feedback function can be removed by modifying as few as 7 bytes using the method described in Equation \ref{form:and}. The modification of the binary can be seen in Figure \ref{fig:mod-asm-imp}. The authors note that the cryptanalysis as described in Section \ref{sec:cryptanalysis} follows in a similar fashion but requires a few extra terms in the equation.
+It turns out that the non-linearity of the feedback function can be removed by modifying as few as 15 bytes using the method described in Equation \ref{form:and}. The modification of the binary can be seen in Figure \ref{fig:mod-asm-imp}. The authors note that the cryptanalysis as described in Section \ref{sec:cryptanalysis} follows in a similar fashion but requires a few extra terms in the equation.
 
 \begin{figure}[H]
 \begin{lstlisting}[style=asm, frame=tlrb]
@@ -518,7 +518,7 @@ The initial state is then expressed as a system of 288 linear equations, made up
  
 \section{Summary and Future Work}
 
-In this paper we presented a non-invasive attack on the Trivium stream cipher. The attack introduces stuck-at-0 faults at the outputs of AND gates by modifying only 18 bytes in the binary code. Our attack reduces the non-linear feedback function to a linear one, making retrieval of the internal state and key tractable.
+In this paper we presented a non-invasive attack on the Trivium stream cipher. The attack introduces stuck-at-0 faults at the outputs of AND gates by modifying only 21 bytes in the binary code. We note that it is also possible to introduce a stuck-at-1 fault modifying as few as 15 bytes.Our attack reduces the non-linear feedback function to a linear one, making retrieval of the internal state and key tractable.
 
 A way to further develop the attack would be to use a combination of our proposed stuck-at-0 fault injection along with another previously studied attack. One such possibility would be to mount the GD attack by \cite{Rohani2010} as discussed in Section \ref{sec:previous-work} on top of our fault injection. This could potentially further improve the attack, although this remains to be investigated. In this paper, we have focused solely on the software implementation of Trivium. Since Trivium was selected as part of the hardware portfolio of the eSTREAM project, it would make sense to test the attack on a hardware implementation of the cipher. Such an attack would similarly aim to modify the VHDL code in targeted positions, and then load the faulty design onto the FPGA. It is likely that a hardware based attack would have the same outcome as in software.
 
