@@ -59,8 +59,8 @@ class Trivium:
         t_2 = self.state[168] ^ self.state[183]
         t_3 = self.state[249] ^ self.state[294]
 
-        # out = t_1 ^ t_2 ^ t_3
-        out = t_1 ^ t_1 ^ t_1
+        out = t_1 ^ t_2 ^ t_3
+        # out = t_1 ^ t_1 ^ t_1
 
         s_1 = a_1 ^ self.state[177] ^ t_1
         s_2 = a_2 ^ self.state[270] ^ t_2
@@ -95,7 +95,7 @@ def main():
 
     for i in range(1):
         keystream = []
-        for j in range(1024):
+        for j in range(2**14):
             keystream.append(next_key_bit())
         print "Stream: "+bits_to_hex(keystream)
 
