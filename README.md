@@ -2,7 +2,6 @@
 
 Directory structure:
 * `./diagrams-tex`: circuit / LFSR diagram
-* `./java-code/`: java reversal code
-* `./official-c`: official C code / modified code
+* `./code`: official C code / modified code
 * `./presentation`: presentation
 * `./report`: formal paper
